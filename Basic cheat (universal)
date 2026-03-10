@@ -1,0 +1,171 @@
+-- [[ 🌀 NICO SARMIENTO EDITION - RECTANGLE GOD VERSION FINAL FIXED ]]
+-- [[ PROTECTION: REMOTE PROTECTOR + ANTI-LOG + STREAMPROOF ]]
+
+local v_game = game
+local v_core = v_game:GetService("CoreGui")
+local v_run = v_game:GetService("RunService")
+local v_lp = v_game:GetService("Players").LocalPlayer
+local v_mouse = v_lp:GetMouse()
+local v_camera = workspace.CurrentCamera
+
+-- [[ 🛡️ 1. ORIGINAL PROTECTION ]]
+local v_mt = getrawmetatable(v_game)
+local v_namecall = v_mt.__namecall
+setreadonly(v_mt, false)
+v_mt.__namecall = newcclosure(function(self, ...)
+    local v_method = getnamecallmethod()
+    if v_method == "FireServer" and (tostring(self):lower():find("check") or tostring(self):lower():find("ban") or tostring(self):lower():find("log") or tostring(self):lower():find("kick")) then
+        return nil 
+    end
+    return v_namecall(self, ...)
+end)
+setreadonly(v_mt, true)
+
+local n_gui = Instance.new("ScreenGui")
+n_gui.Name = "Nico_Rectangle_Final_Fixed"
+if gethui then n_gui.Parent = gethui() else n_gui.Parent = v_core end
+
+-- [[ 🛠️ 2. VARIABLES ]]
+local v_fly, v_noclip, v_speed, v_god, v_antiragdoll = false, false, false, false, false
+local v_up, v_down = false, false
+local v_chams, v_aimbot, v_esp_line, v_big_hitbox = false, false, false, false
+local v_extra_lives = 0
+local v_tracking = {}
+
+-- [[ 🕒 3. LOADING SYSTEM ]]
+local v_queue = {}
+local v_is_run = false
+local function v_process()
+    if v_is_run or #v_queue == 0 then return end
+    v_is_run = true
+    while #v_queue > 0 do
+        local v_act = table.remove(v_queue, 1)
+        v_act.Callback(); task.wait(0.1)
+    end
+    v_is_run = false
+end
+
+-- [[ 🎨 4. WINDOW CREATOR (FINDER/TP) ]]
+local function v_make_win(v_title, v_color, v_pos)
+    local w = Instance.new("Frame", n_gui); w.Size = UDim2.new(0, 240, 0, 280); w.Position = v_pos; w.BackgroundColor3 = Color3.fromRGB(20, 20, 25); w.Visible = false; Instance.new("UICorner", w)
+    local t = Instance.new("TextLabel", w); t.Size = UDim2.new(1,0,0,35); t.Text = v_title; t.BackgroundColor3 = v_color; t.TextColor3 = Color3.new(1,1,1); t.Font = "GothamBold"; Instance.new("UICorner", t)
+    local sc = Instance.new("ScrollingFrame", w); sc.Name = "Holder"; sc.Size = UDim2.new(1,-10,1,-45); sc.Position = UDim2.new(0,5,0,40); sc.BackgroundTransparency = 1; sc.ScrollBarThickness = 2; sc.AutomaticCanvasSize = "Y"; Instance.new("UIListLayout", sc).Padding = UDim.new(0, 5)
+    local x = Instance.new("TextButton", w); x.Size = UDim2.new(0,25,0,25); x.Position = UDim2.new(1,-28,0,5); x.Text = "X"; x.BackgroundColor3 = Color3.fromRGB(200, 50, 50); x.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", x); x.MouseButton1Click:Connect(function() w.Visible = false end)
+    return w, sc
+end
+
+local v_pW, v_pS = v_make_win("🔍 FINDER", Color3.fromRGB(160, 90, 45), UDim2.new(0.5, -350, 0.5, -140))
+local v_tW, v_tS = v_make_win("📍 TELEPORT", Color3.fromRGB(0, 130, 90), UDim2.new(0.5, 110, 0.5, -140))
+
+-- [[ 📜 5. MAIN MENU (RECTANGLE - MALAPAD) ]]
+local v_main = Instance.new("Frame", n_gui); v_main.Size = UDim2.new(0, 320, 0, 280); v_main.Position = UDim2.new(0.5, -160, 0.5, -140); v_main.BackgroundColor3 = Color3.fromRGB(20, 20, 25); v_main.Visible = false; Instance.new("UICorner", v_main)
+local v_title = Instance.new("TextLabel", v_main); v_title.Size = UDim2.new(1,0,0,45); v_title.BackgroundTransparency = 1; v_title.TextColor3 = Color3.new(1,1,1); v_title.Text = "NICO ULTRA SNATCHER"; v_title.Font = "GothamBold"; v_title.TextSize = 16
+local v_scroll = Instance.new("ScrollingFrame", v_main); v_scroll.Size = UDim2.new(1,-10,1,-55); v_scroll.Position = UDim2.new(0,5,0,50); v_scroll.BackgroundTransparency = 1; v_scroll.ScrollBarThickness = 0; v_scroll.AutomaticCanvasSize = "Y"; Instance.new("UIListLayout", v_scroll).Padding = UDim.new(0,6)
+
+local function v_toggle(txt, call)
+    local b = Instance.new("TextButton", v_scroll); b.Size = UDim2.new(1,0,0,35); b.Text = txt..": OFF"; b.BackgroundColor3 = Color3.fromRGB(40,40,45); b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; Instance.new("UICorner", b)
+    local s = false
+    b.MouseButton1Click:Connect(function()
+        s = not s; b.Text = txt..(s and ": ON" or ": OFF"); b.BackgroundColor3 = s and Color3.fromRGB(0,100,255) or Color3.fromRGB(40,40,45)
+        call(s)
+    end)
+end
+
+v_toggle("God Mode", function(s) v_god = s end)
+v_toggle("No Clip", function(s) v_noclip = s end)
+v_toggle("Speed Hack", function(s) v_speed = s end)
+v_toggle("Anti Ragdoll", function(s) v_antiragdoll = s end)
+v_toggle("Chams", function(s) v_chams = s end)
+v_toggle("Aimlock (Scope)", function(s) v_aimbot = s end)
+v_toggle("ESP Line", function(s) v_esp_line = s end)
+v_toggle("Big Hitbox", function(s) v_big_hitbox = s end)
+
+-- ADD LIFE WITH VALUE BOX
+local life_f = Instance.new("Frame", v_scroll); life_f.Size = UDim2.new(1,0,0,35); life_f.BackgroundTransparency = 1
+local life_t = Instance.new("TextLabel", life_f); life_t.Size = UDim2.new(0.6,0,1,0); life_t.Text = "Add Life:"; life_t.TextColor3 = Color3.new(1,1,1); life_t.Font = "GothamBold"; life_t.BackgroundTransparency = 1
+local life_v = Instance.new("TextBox", life_f); life_v.Size = UDim2.new(0.35,0,1,0); life_v.Position = UDim2.new(0.6,0,0,0); life_v.BackgroundColor3 = Color3.fromRGB(50,50,55); life_v.TextColor3 = Color3.new(1,1,0); life_v.Text = "0"; life_v.Font = "GothamBold"; Instance.new("UICorner", life_v)
+life_v.FocusLost:Connect(function() v_extra_lives = tonumber(life_v.Text) or 0 end)
+
+-- [[ ⚡ 6. CORE HEARTBEAT (FIXED FLY & TP) ]]
+v_run.Heartbeat:Connect(function()
+    pcall(function()
+        local char = v_lp.Character
+        local hrp = char.HumanoidRootPart
+        local hum = char.Humanoid
+        
+        -- AUTO LIFE
+        if v_extra_lives > 0 and hum.Health <= 0 then
+            v_extra_lives = v_extra_lives - 1; life_v.Text = tostring(v_extra_lives)
+            local old_cf = hrp.CFrame; task.wait(0.1); v_lp:LoadCharacter(); task.wait(0.2); v_lp.Character.HumanoidRootPart.CFrame = old_cf
+        end
+
+        if v_speed and hum.MoveDirection.Magnitude > 0 then hrp.CFrame = hrp.CFrame + (hum.MoveDirection * 1.1) end
+        if v_god then hum.MaxHealth, hum.Health = 9e9, 9e9 end
+        if v_noclip then for _,v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end end
+
+        -- FIXED FLY (MAKIKATAYO PAG OFF)
+        if v_fly then
+            local bv = hrp:FindFirstChild("FlyBV") or Instance.new("BodyVelocity", hrp); bv.Name = "FlyBV"
+            local bg = hrp:FindFirstChild("FlyBG") or Instance.new("BodyGyro", hrp); bg.Name = "FlyBG"
+            bv.MaxForce, bg.MaxTorque = Vector3.new(9e9,9e9,9e9), Vector3.new(9e9,9e9,9e9)
+            hum.PlatformStand = true
+            bv.Velocity = (hum.MoveDirection * 100) + Vector3.new(0, (v_up and 100 or 0) + (v_down and -100 or 0), 0)
+            bg.CFrame = workspace.CurrentCamera.CFrame
+        else
+            if hrp:FindFirstChild("FlyBV") then hrp.FlyBV:Destroy() end
+            if hrp:FindFirstChild("FlyBG") then hrp.FlyBG:Destroy() end
+            hum.PlatformStand = false -- MAKIKATAYO NA DITO
+        end
+
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p ~= v_lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local t_hrp = p.Character.HumanoidRootPart
+                if v_big_hitbox then t_hrp.Size = Vector3.new(10,10,10); t_hrp.Transparency = 0.8 else t_hrp.Size = Vector3.new(2,2,1); t_hrp.Transparency = 1 end
+                if v_chams then if not p.Character:FindFirstChild("NicoChams") then Instance.new("Highlight", p.Character).Name = "NicoChams" end else if p.Character:FindFirstChild("NicoChams") then p.Character.NicoChams:Destroy() end end
+                local lN = p.Name.."_Line"
+                if (v_esp_line or v_tracking[p.Name]) then local l = char:FindFirstChild(lN) or Instance.new("SelectionPartLasso", char); l.Name = lN; l.Part = t_hrp; l.Humanoid = hum; l.Color3 = v_tracking[p.Name] and Color3.new(1,1,0) or Color3.new(1,1,1) else if char:FindFirstChild(lN) then char[lN]:Destroy() end end
+                if v_aimbot and game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then v_camera.CFrame = CFrame.new(v_camera.CFrame.Position, t_hrp.Position) end
+            end
+        end
+    end)
+end)
+
+-- [[ 🕹️ 7. SHORTCUT ICONS ]]
+local function v_create_icon(txt, pos, color, call)
+    local b = Instance.new("TextButton", n_gui); b.Size = UDim2.new(0,45,0,45); b.Position = pos; b.Text = txt; b.BackgroundColor3 = color; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"; Instance.new("UICorner", b).CornerRadius = UDim.new(1,0)
+    b.MouseButton1Click:Connect(call); return b
+end
+
+v_create_icon("NICO", UDim2.new(0,10,0.5,-27), Color3.fromRGB(0,120,255), function() v_main.Visible = not v_main.Visible end)
+v_create_icon("📍", UDim2.new(1,-55,0.2,0), Color3.fromRGB(0,150,100), function() v_tW.Visible = not v_tW.Visible; if v_tW.Visible then v_update_list(v_tS, "TP") end end)
+v_create_icon("🔍", UDim2.new(1,-55,0.2,50), Color3.fromRGB(160,90,45), function() v_pW.Visible = not v_pW.Visible; if v_pW.Visible then v_update_list(v_pS, "FIND") end end)
+v_create_icon("🚀", UDim2.new(1,-105,0.2,0), Color3.fromRGB(255,100,0), function() v_fly = not v_fly; v_u.Visible = v_fly; v_d.Visible = v_fly end)
+
+v_u = v_create_icon("▲", UDim2.new(1,-105,0.2,50), Color3.fromRGB(50,50,55), function() end); v_u.Visible = false
+v_d = v_create_icon("▼", UDim2.new(1,-105,0.2,100), Color3.fromRGB(50,50,55), function() end); v_d.Visible = false
+v_u.MouseButton1Down:Connect(function() v_up = true end); v_u.MouseButton1Up:Connect(function() v_up = false end)
+v_d.MouseButton1Down:Connect(function() v_down = true end); v_d.MouseButton1Up:Connect(function() v_down = false end)
+
+-- [[ 📍 8. LIST UPDATER (FIXED TP POSITION) ]]
+function v_update_list(sc, mode)
+    for _,v in pairs(sc:GetChildren()) do if v:IsA("Frame") then v:Destroy() end end
+    for _,p in pairs(game.Players:GetPlayers()) do
+        if p ~= v_lp then
+            local f = Instance.new("Frame", sc); f.Size = UDim2.new(1,-5,0,35); f.BackgroundColor3 = Color3.fromRGB(35,35,40); Instance.new("UICorner", f)
+            local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,-65,1,0); t.Text = p.Name; t.TextColor3 = Color3.new(1,1,1); t.BackgroundTransparency = 1; t.Font = "GothamBold"; t.TextScaled = true
+            local b = Instance.new("TextButton", f); b.Size = UDim2.new(0,55,0,25); b.Position = UDim2.new(1,-58,0.5,-12); Instance.new("UICorner", b); b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamBold"
+            if mode == "TP" then 
+                b.Text = "TP"; b.BackgroundColor3 = Color3.fromRGB(0,120,255)
+                b.MouseButton1Click:Connect(function() 
+                    -- TELEPORT SA LIKOD AT HINDI LUBOG
+                    local target_hrp = p.Character.HumanoidRootPart
+                    v_lp.Character.HumanoidRootPart.CFrame = target_hrp.CFrame * CFrame.new(0, 0, 3) -- 3 studs sa LIKOD
+                end)
+            else 
+                b.Text = v_tracking[p.Name] and "ON" or "OFF"; b.BackgroundColor3 = v_tracking[p.Name] and Color3.new(0,0.6,0) or Color3.fromRGB(60,60,65)
+                b.MouseButton1Click:Connect(function() v_tracking[p.Name] = not v_tracking[p.Name]; v_update_list(sc, mode) end) 
+            end
+        end
+    end
+end
+
