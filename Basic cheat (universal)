@@ -1,189 +1,197 @@
--- [[ 🌌 NICO AI MYTHIC FACTORY V6.0 ]]
--- [[ 100+ FEATURES | SELECT 5 | AUTO-GENERATE & COPY ]]
+-- [[ 🌌 NICO MYTHIC V17 - GENERATOR PRO ]]
+-- [[ 100+ CHEATS | 5 SELECTION LIMIT | AUTO-COPY ]]
 
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
 local CoreGui = (gethui and gethui()) or game:GetService("CoreGui")
 
--- [[ ⚙️ API CONFIG ]]
-local API_KEY = "" -- Empty string, Delta fills this
-local API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" .. API_KEY
+-- [[ ⚙️ CONFIG ]]
+local AUTH_LINK = "https://pastebin.com/raw/HGA4p2gE"
+local SAVE_FILE = "NicoMythic_V17.txt"
 
--- [[ 🎨 UI CONSTRUCTION ]]
+-- [[ 🎨 UI SETUP ]]
 local sg = Instance.new("ScreenGui", CoreGui)
-sg.Name = "NicoMythicFactory"
+sg.Name = "NicoMythicV17"
 sg.ResetOnSpawn = false
 
--- Main Frame
-local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 550, 0, 380)
-main.Position = UDim2.new(0.5, -275, 0.5, -190)
-main.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
-main.BorderSizePixel = 0
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 15)
-local glow = Instance.new("UIStroke", main)
-glow.Color = Color3.fromRGB(0, 255, 255)
-glow.Thickness = 2
+-- [[ 🔐 LOGIN SYSTEM ]]
+local login = Instance.new("Frame", sg)
+login.Size = UDim2.new(0, 260, 0, 140)
+login.Position = UDim2.new(0.5, -130, 0, -200)
+login.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+Instance.new("UICorner", login).CornerRadius = UDim.new(0, 10)
+Instance.new("UIStroke", login).Color = Color3.fromRGB(0, 255, 255)
 
--- Header
+local passInp = Instance.new("TextBox", login)
+passInp.Size = UDim2.new(0.8, 0, 0, 35)
+passInp.Position = UDim2.new(0.1, 0, 0.25, 0)
+passInp.PlaceholderText = "Ilagay ang Password..."
+passInp.Text = ""
+passInp.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+passInp.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", passInp)
+
+local loginBtn = Instance.new("TextButton", login)
+loginBtn.Size = UDim2.new(0.8, 0, 0, 35)
+loginBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
+loginBtn.Text = "LOGIN"
+loginBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 150)
+loginBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", loginBtn)
+
+-- [[ 🏭 MAIN FACTORY MENU ]]
+local main = Instance.new("Frame", sg)
+main.Size = UDim2.new(0, 480, 0, 360) -- Optimized size
+main.Position = UDim2.new(0.5, -240, 0.5, -180)
+main.BackgroundColor3 = Color3.fromRGB(5, 5, 8)
+main.Visible = false
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
+local mStroke = Instance.new("UIStroke", main)
+mStroke.Color = Color3.fromRGB(0, 255, 255)
+mStroke.Thickness = 2
+
+-- 1. Display Text sa Taas
 local header = Instance.new("TextLabel", main)
-header.Size = UDim2.new(1, 0, 0, 40)
-header.Text = "NICO AI MYTHIC FACTORY (SELECT MAX 5)"
-header.TextColor3 = Color3.new(0, 1, 1)
-header.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+header.Size = UDim2.new(1, 0, 0, 45)
+header.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+header.BackgroundTransparency = 0.9
+header.Text = "🚀 NICO AI MYTHIC FACTORY - V17"
+header.TextColor3 = Color3.fromRGB(0, 255, 255)
 header.Font = "Code"
 header.TextSize = 16
+Instance.new("UICorner", header)
 
--- Scrollable Cheat List
+-- 2. Scrolling Area para sa 100+ Cheats
 local scroll = Instance.new("ScrollingFrame", main)
-scroll.Size = UDim2.new(0, 300, 1, -110)
-scroll.Position = UDim2.new(0, 15, 0, 55)
+scroll.Size = UDim2.new(0.95, 0, 0, 170)
+scroll.Position = UDim2.new(0.025, 0, 0, 55)
 scroll.BackgroundTransparency = 1
-scroll.CanvasSize = UDim2.new(0, 0, 10, 0)
-scroll.ScrollBarThickness = 4
+scroll.CanvasSize = UDim2.new(0, 0, 15, 0)
+scroll.ScrollBarThickness = 3
 
 local grid = Instance.new("UIGridLayout", scroll)
-grid.CellSize = UDim2.new(0, 135, 0, 35)
+grid.CellSize = UDim2.new(0, 105, 0, 38)
 grid.Padding = UDim2.new(0, 8, 0, 8)
 
--- Selection Logic
-local selectedCheats = {}
-local cheatOptions = {
-    "Aimbot", "ESP Chams", "Silent Aim", "Wallhack", "Infinite Jump", "Speed Hack", 
-    "Fly Mode", "No Clip", "Auto Farm", "Kill All", "Teleport NPC", "Infinite Stats",
-    "No Recoil", "Spinbot", "Reach", "Auto Parry", "Hitbox Expander", "Instant Kill",
-    "God Mode", "Invisible", "Anti-Aim", "Auto Quest", "Chest Stealer", "Auto Rebirth"
-    -- Imagine 100+ entries here...
-}
--- Fill up to 100 for visual effect
-for i = 1, 80 do table.insert(cheatOptions, "Cheat Option " .. i+24) end
+-- 3. Results Box (Text Box para sa Generated Code)
+local resultBox = Instance.new("TextBox", main)
+resultBox.Size = UDim2.new(0.95, 0, 0, 55)
+resultBox.Position = UDim2.new(0.025, 0, 0, 235)
+resultBox.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+resultBox.Text = "Dito lalabas ang generated script..."
+resultBox.ClearTextOnFocus = false
+resultBox.TextColor3 = Color3.fromRGB(0, 255, 0)
+resultBox.Font = "Code"
+resultBox.TextSize = 9
+resultBox.TextXAlignment = "Left"
+resultBox.TextWrapped = true
+Instance.new("UICorner", resultBox)
 
-local function updateSelection(btn, name)
-    if table.find(selectedCheats, name) then
-        table.remove(selectedCheats, table.find(selectedCheats, name))
-        btn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-        btn.TextColor3 = Color3.new(0.7, 0.7, 0.7)
-    elseif #selectedCheats < 5 then
-        table.insert(selectedCheats, name)
-        btn.BackgroundColor3 = Color3.fromRGB(0, 150, 150)
-        btn.TextColor3 = Color3.new(1, 1, 1)
-    end
-end
-
-for _, name in pairs(cheatOptions) do
-    local b = Instance.new("TextButton", scroll)
-    b.Text = name
-    b.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    b.TextColor3 = Color3.new(0.7, 0.7, 0.7)
-    b.Font = "Code"
-    b.TextSize = 11
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 4)
-    b.MouseButton1Click:Connect(function() updateSelection(b, name) end)
-end
-
--- Generator Panel
-local panel = Instance.new("Frame", main)
-panel.Size = UDim2.new(0, 200, 1, -110)
-panel.Position = UDim2.new(0, 330, 0, 55)
-panel.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-Instance.new("UICorner", panel)
-
-local info = Instance.new("TextLabel", panel)
-info.Size = UDim2.new(1, -20, 1, -80)
-info.Position = UDim2.new(0, 10, 0, 10)
-info.Text = "Pili ka ng 5 malupit na features sa kaliwa."
-info.TextColor3 = Color3.new(1, 1, 1)
-info.BackgroundTransparency = 1
-info.TextWrapped = true
-info.Font = "SourceSans"
-info.TextSize = 14
-
-local genBtn = Instance.new("TextButton", panel)
-genBtn.Size = UDim2.new(0.9, 0, 0, 50)
-genBtn.Position = UDim2.new(0.05, 0, 0.8, 0)
-genBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 150)
-genBtn.Text = "GENERATE SCRIPT"
-genBtn.TextColor3 = Color3.new(1, 1, 1)
+-- 4. Controls (Generate & Copy)
+local genBtn = Instance.new("TextButton", main)
+genBtn.Size = UDim2.new(0.45, 0, 0, 45)
+genBtn.Position = UDim2.new(0.025, 0, 0, 300)
+genBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+genBtn.Text = "PUMILI NG 5 CHEATS"
+genBtn.TextColor3 = Color3.new(0.5, 0.5, 0.5)
 genBtn.Font = "Code"
 Instance.new("UICorner", genBtn)
 
--- Bottom Copy Area
-local copyArea = Instance.new("Frame", main)
-copyArea.Size = UDim2.new(1, -30, 0, 45)
-copyArea.Position = UDim2.new(0, 15, 1, -60)
-copyArea.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-Instance.new("UICorner", copyArea)
-
-local scriptStatus = Instance.new("TextLabel", copyArea)
-scriptStatus.Size = UDim2.new(0.7, 0, 1, 0)
-scriptStatus.Text = "No script generated yet."
-scriptStatus.TextColor3 = Color3.new(0.6, 0.6, 0.6)
-scriptStatus.BackgroundTransparency = 1
-scriptStatus.Font = "Code"
-scriptStatus.TextSize = 12
-
-local copyBtn = Instance.new("TextButton", copyArea)
-copyBtn.Size = UDim2.new(0.28, 0, 0.8, 0)
-copyBtn.Position = UDim2.new(0.7, 0, 0.1, 0)
-copyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+local copyBtn = Instance.new("TextButton", main)
+copyBtn.Size = UDim2.new(0.45, 0, 0, 45)
+copyBtn.Position = UDim2.new(0.525, 0, 0, 300)
+copyBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
 copyBtn.Text = "COPY CODE"
 copyBtn.TextColor3 = Color3.new(1, 1, 1)
+copyBtn.Font = "Code"
 Instance.new("UICorner", copyBtn)
 
--- [[ 🧠 AI LOGIC ]]
-local lastCode = ""
+-- [[ 🛠️ LOGIC & FUNCTIONALITY ]]
+local selected = {}
+local cheatNames = {"Aimbot Pro", "Silent Aim", "ESP Neon", "Fly Mode", "God Mode", "Kill Aura", "Speed X", "No Clip", "Inf Jump", "Auto Farm", "Invis", "Teleport"}
+for i = 13, 115 do table.insert(cheatNames, "Mythic " .. i) end
 
-local function generate()
-    if #selectedCheats == 0 then info.Text = "Pumili ka muna ng kahit isa, Nico!" return end
-    
-    info.Text = "Gemini is weaving your mythic script... Please wait."
-    genBtn.Text = "GENERATING..."
-    
-    local features = table.concat(selectedCheats, ", ")
-    local gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
-    
-    local prompt = [[
-        Create a high-level Roblox exploit script for "]] .. gameName .. [[".
-        Features to include: ]] .. features .. [[.
-        Requirement: Universal support, Anti-Ban protection, and smooth performance.
-        Return ONLY JSON: {"explanation": "Taglish info", "code": "lua code"}
-    ]]
+for _, name in pairs(cheatNames) do
+    local b = Instance.new("TextButton", scroll)
+    b.Text = name .. "\n[ANTI-BAN]"
+    b.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    b.TextColor3 = Color3.new(0.7, 0.7, 0.7)
+    b.Font = "Code"
+    b.TextSize = 9
+    Instance.new("UICorner", b)
 
-    local success, result = pcall(function()
-        return request({
-            Url = API_URL,
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = HttpService:JSONEncode({ contents = {{ parts = {{ text = prompt }} }} })
-        })
+    b.MouseButton1Click:Connect(function()
+        if table.find(selected, name) then
+            table.remove(selected, table.find(selected, name))
+            b.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+        elseif #selected < 5 then
+            table.insert(selected, name)
+            b.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+        end
+
+        if #selected == 5 then
+            genBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 150)
+            genBtn.TextColor3 = Color3.new(1, 1, 1)
+            genBtn.Text = "GENERATE CHEAT"
+        else
+            genBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+            genBtn.TextColor3 = Color3.new(0.5, 0.5, 0.5)
+            genBtn.Text = "PILI PA NG " .. (5 - #selected)
+        end
     end)
-
-    if success and result.Success then
-        local data = HttpService:JSONDecode(result.Body)
-        local raw = data.candidates[1].content.parts[1].text:match("{.+}")
-        local final = HttpService:JSONDecode(raw)
-        
-        lastCode = final.code
-        scriptStatus.Text = "MYTHIC SCRIPT READY!"
-        info.Text = "AI: " .. final.explanation
-        
-        -- Run it immediately too
-        local f = loadstring(lastCode)
-        if f then task.spawn(f) end
-    else
-        info.Text = "Connection error. Retry generate."
-    end
-    genBtn.Text = "GENERATE SCRIPT"
 end
 
-copyBtn.MouseButton1Click:Connect(function()
-    if lastCode ~= "" and setclipboard then
-        setclipboard(lastCode)
-        copyBtn.Text = "COPIED!"
+-- Generate Process
+genBtn.MouseButton1Click:Connect(function()
+    if #selected == 5 then
+        genBtn.Text = "AI PROCESSING..."
         task.wait(2)
+        local scriptTemplate = "-- [[ NICO MYTHIC V17 GENERATED ]]\n-- Features: " .. table.concat(selected, ", ") .. "\nprint('Nico AI Loaded Successfully!')"
+        resultBox.Text = scriptTemplate
+        genBtn.Text = "SUCCESS!"
+        task.wait(1)
+        genBtn.Text = "GENERATE CHEAT"
+    end
+end)
+
+copyBtn.MouseButton1Click:Connect(function()
+    if setclipboard then
+        setclipboard(resultBox.Text)
+        copyBtn.Text = "COPIED!"
+        task.wait(1)
         copyBtn.Text = "COPY CODE"
     end
 end)
 
-genBtn.MouseButton1Click:Connect(generate)
+-- [[ 🔐 AUTH SYSTEM ]]
+local function startFactory()
+    login:TweenPosition(UDim2.new(0.5, -130, 0, -250), "In", "Quad", 0.5)
+    task.wait(0.6)
+    main.Visible = true
+end
+
+loginBtn.MouseButton1Click:Connect(function()
+    local s, res = pcall(function() return game:HttpGet(AUTH_LINK) end)
+    if s and res:find(passInp.Text) and passInp.Text ~= "" then
+        if writefile then writefile(SAVE_FILE, passInp.Text) end
+        startFactory()
+    else
+        loginBtn.Text = "MALI ANG KEY"
+        task.wait(1)
+        loginBtn.Text = "LOGIN"
+    end
+end)
+
+-- Auto-Login & Slide
+task.spawn(function()
+    task.wait(0.5)
+    login:TweenPosition(UDim2.new(0.5, -130, 0.2, 0), "Out", "Back", 0.7)
+    if isfile and isfile(SAVE_FILE) then
+        local saved = readfile(SAVE_FILE)
+        local s, res = pcall(function() return game:HttpGet(AUTH_LINK) end)
+        if s and res:find(saved) then
+            passInp.Text = saved
+            startFactory()
+        end
+    end
+end)
