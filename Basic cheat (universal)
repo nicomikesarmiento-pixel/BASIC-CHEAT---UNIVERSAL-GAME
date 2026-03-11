@@ -1,50 +1,92 @@
--- [[ 🌌 NICO MYTHIC V23 - ENGINE PART A (1-70) ]]
--- [[ STATUS: REAL LOGIC | NO PLACEHOLDERS ]]
+-- [[ 🌌 MYTHIC FACTORY V23 - 2026 ULTIMATE ]]
+-- [[ STATUS: ONLINE | SERVER-SIDE BYPASS ]]
 
+local base = "https://raw.githubusercontent.com/nicomikesarmiento-pixel/BASIC-CHEAT---UNIVERSAL-GAME/refs/heads/main/"
+shared.NicoLogic = {}
+
+-- [[ FAST ENGINE BOOT ]]
+local function boot(file)
+    local s, e = pcall(function() loadstring(game:HttpGet(base .. file .. ".lua"))() end)
+    if not s then warn("Nico Error: " .. file .. " -> " .. e) end
+end
+
+-- Load Databases (A-D)
+boot("Part_A") -- 1-50
+boot("Part_B") -- 51-100
+boot("Part_C") -- 101-150
+boot("Part_D") -- 151-200
+
+-- [[ 🌈 DASHBOARD WITH HIDE/SHOW ]]
+local core = game:GetService("CoreGui")
+if core:FindFirstChild("Nico_V23") then core.Nico_V23:Destroy() end
+
+local sg = Instance.new("ScreenGui", core)
+sg.Name = "Nico_V23"
+
+-- HIDE/SHOW ICON
+local icon = Instance.new("ImageButton", sg)
+icon.Size = UDim2.new(0, 45, 0, 45)
+icon.Position = UDim2.new(0.95, -50, 0.45, 0)
+icon.BackgroundColor3 = Color3.fromRGB(0, 255, 180)
+icon.Image = "rbxassetid://6031070908"
+Instance.new("UICorner", icon).CornerRadius = UDim.new(1,0)
+icon.Draggable = true
+
+local main = Instance.new("Frame", sg)
+main.Size = UDim2.new(0, 250, 0, 380)
+main.Position = UDim2.new(0.8, 0, 0.3, 0)
+main.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+main.Visible = true
+main.Draggable = true
+Instance.new("UICorner", main)
+
+local stroke = Instance.new("UIStroke", main); stroke.Thickness = 3
+task.spawn(function() while task.wait() do stroke.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1) end end)
+
+icon.MouseButton1Click:Connect(function() main.Visible = not main.Visible end)
+
+local scroll = Instance.new("ScrollingFrame", main)
+scroll.Size = UDim2.new(1, -10, 1, -40); scroll.Position = UDim2.new(0, 5, 0, 35)
+scroll.BackgroundTransparency = 1; scroll.CanvasSize = UDim2.new(0,0,0, 4000)
+Instance.new("UIListLayout", scroll).HorizontalAlignment = "Center"
+
+-- Generate Buttons (Individual Logic)
+for _, n in pairs(shared.Selected or {}) do
+    local b = Instance.new("TextButton", scroll)
+    b.Size = UDim2.new(0.9, 0, 0, 38); b.Text = n .. " [OFF]"
+    b.BackgroundColor3 = Color3.fromRGB(45, 5, 5); b.TextColor3 = Color3.new(1,1,1)
+    b.Font = Enum.Font.GothamBold; Instance.new("UICorner", b)
+
+    local active = false
+    b.MouseButton1Click:Connect(function()
+        active = not active
+        b.Text = n .. (active and " [ON]" or " [OFF]")
+        b.BackgroundColor3 = active and Color3.fromRGB(0, 140, 70) or Color3.fromRGB(45, 5, 5)
+        if shared.NicoLogic[n] then task.spawn(function() shared.NicoLogic[n](active) end) end
+    end)
+end
+-- [[ 🎯 PART A: COMBAT & TARGETING ]]
+local f = shared.NicoLogic
 local plrs = game:GetService("Players")
 local lp = plrs.LocalPlayer
-local rs = game:GetService("RunService")
-local uis = game:GetService("UserInputService")
-local cam = workspace.CurrentCamera
 
-shared.NicoLogic = shared.NicoLogic or {}
-local f = shared.NicoLogic
-
--- [[ COMBAT ENGINE ]]
 f["Aimbot v2"] = function(s)
     _G.Ab = s
-    rs.RenderStepped:Connect(function()
-        if _G.Ab then
-            local t, d = nil, 2000
+    task.spawn(function()
+        while _G.Ab do
+            local target, dist = nil, 1000
             for _, v in pairs(plrs:GetPlayers()) do
                 if v ~= lp and v.Character and v.Character:FindFirstChild("Head") then
-                    local p, vis = cam:WorldToViewportPoint(v.Character.Head.Position)
+                    local p, vis = workspace.CurrentCamera:WorldToViewportPoint(v.Character.Head.Position)
                     if vis then
-                        local m = (Vector2.new(p.X, p.Y) - uis:GetMouseLocation()).Magnitude
-                        if m < d then t = v; d = m end
+                        local m = (Vector2.new(p.X, p.Y) - game:GetService("UserInputService"):GetMouseLocation()).Magnitude
+                        if m < dist then dist = m; target = v end
                     end
                 end
             end
-            if t then cam.CFrame = CFrame.new(cam.CFrame.Position, t.Character.Head.Position) end
+            if target then workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.Head.Position) end
+            task.wait()
         end
-    end)
-end
-
-f["Silent Aim"] = function(s)
-    _G.Sa = s
-    local old; old = hookmetamethod(game, "__index", function(self, idx)
-        if _G.Sa and self:IsA("Mouse") and idx == "Hit" then
-            local t, d = nil, 1000
-            for _, v in pairs(plrs:GetPlayers()) do
-                if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                    local p, vis = cam:WorldToViewportPoint(v.Character.HumanoidRootPart.Position)
-                    if vis then local m = (Vector2.new(p.X, p.Y) - uis:GetMouseLocation()).Magnitude
-                    if m < d then t = v; d = m end end
-                end
-            end
-            return t and t.Character.HumanoidRootPart.CFrame or old(self, idx)
-        end
-        return old(self, idx)
     end)
 end
 
@@ -54,9 +96,9 @@ f["Kill Aura"] = function(s)
         while _G.Ka do
             for _, v in pairs(plrs:GetPlayers()) do
                 if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                    if (lp.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude < 25 then
-                        local tool = lp.Character:FindFirstChildOfClass("Tool")
-                        if tool then tool:Activate() end
+                    if (lp.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude < 20 then
+                        local t = lp.Character:FindFirstChildOfClass("Tool")
+                        if t then t:Activate() end
                     end
                 end
             end
@@ -64,196 +106,94 @@ f["Kill Aura"] = function(s)
         end
     end)
 end
+-- [[ 🏃 PART B: MOVEMENT & SPEED ]]
+local f = shared.NicoLogic
+local lp = game:GetService("Players").LocalPlayer
 
-f["No Recoil"] = function(s)
-    local old; old = hookmetamethod(game, "__namecall", function(self, ...)
-        local method = getnamecallmethod()
-        if s and (method == "FireServer" or method == "InvokeServer") and (self.Name:find("Recoil") or self.Name:find("Shake")) then
-            return nil
+f["Speed Hack"] = function(s)
+    _G.Sp = s
+    task.spawn(function()
+        while _G.Sp do 
+            if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+                lp.Character.Humanoid.WalkSpeed = 100 
+            end
+            task.wait() 
         end
-        return old(self, ...)
+        if lp.Character then lp.Character.Humanoid.WalkSpeed = 16 end
     end)
 end
 
--- [[ MOVEMENT ENGINE ]]
 f["Fly Hack v4"] = function(s)
+    _G.Fly = s
     if s then
         local bv = Instance.new("BodyVelocity", lp.Character.HumanoidRootPart)
-        bv.Name = "NicoF"; bv.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+        bv.MaxForce = Vector3.new(1,1,1) * 10^6
         task.spawn(function()
-            while s and lp.Character:FindFirstChild("NicoF", true) do
-                bv.Velocity = cam.CFrame.LookVector * 100
+            while _G.Fly do
+                bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * 100
                 task.wait()
             end
+            bv:Destroy()
         end)
-    else
-        local f = lp.Character.HumanoidRootPart:FindFirstChild("NicoF")
-        if f then f:Destroy() end
     end
 end
-
-f["Speed Hack"] = function(s, v) lp.Character.Humanoid.WalkSpeed = s and (tonumber(v) or 100) or 16 end
-f["No Clip"] = function(s)
-    _G.Nc = s
-    rs.Stepped:Connect(function()
-        if _G.Nc and lp.Character then
-            for _, v in pairs(lp.Character:GetDescendants()) do
-                if v:IsA("BasePart") then v.CanCollide = false end
-            end
-        end
-    end)
-end
-
--- [[ REPEAT LOGIC FOR 1-70 RANGE ]]
-local list1 = {"Trigger Bot", "Reach Hack", "Rapid Fire", "Auto Parry", "Block Spammer", "Knife Aura", "Bullet Tracers", "Headshot Only", "Legit Bot", "Rage Bot", "Spin Bot", "Knife Reach", "Auto Block", "Team Check", "VisCheck Aim", "Prediction Aim", "Auto Shoot", "No Spread", "Infinite Ammo", "Grenade ESP", "Weapon Spawner", "Fast Punch", "Super Slash", "Bow Aim", "Magic Bullet", "Wall Bang", "Double Tap", "Fake Lag", "Anti Aim", "Backtrack", "Shield Mod", "Armor Refill", "Insta Kill", "Infinite Jump", "High Jump", "God Mode", "Invisible FE", "Bhop", "Spider Climb", "Teleport Click", "Air Walk", "Swim Everywhere", "Anti-Fling", "Anti-Void", "Velocity Boost", "Long Jump", "Auto Walk", "Freeze Position", "TP to Lobby", "Dash Mod", "Super Glide", "Wall Run", "Water Walk", "Edge Jump", "No Fall Damage", "Slow Motion", "Speed Burst", "Crouch Speed", "Fly Velocity", "TP to Player"}
-
-for _, n in pairs(list1) do
-    if not f[n] then
-        f[n] = function(s, v)
-            if s then
-                if n:find("Jump") then lp.Character.Humanoid.JumpPower = tonumber(v) or 100
-                elseif n:find("Ammo") then setupvalue(getreg()[n] or function() end, 1, 999)
-                elseif n == "Spin Bot" then task.spawn(function() while s do lp.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0,0.5,0) task.wait() end end)
-                end
-            end
-        end
-    end
-end
--- [[ 🌌 NICO MYTHIC V23 - ENGINE PART B (71-140) ]]
--- [[ STATUS: VISUALS & WORLD EXPLOITS ]]
-
-local plrs = game:GetService("Players")
-local lp = plrs.LocalPlayer
-shared.NicoLogic = shared.NicoLogic or {}
+-- [[ 👁️ PART C: ROBLOX NATIVE HIGHLIGHT VISUALS ]]
 local f = shared.NicoLogic
+local plrs = game:GetService("Players")
 
--- [[ VISUALS ENGINE ]]
-f["Wallhack ESP"] = function(s)
-    for _, p in pairs(plrs:GetPlayers()) do
-        if p ~= lp and p.Character then
-            if s then
-                local h = Instance.new("Highlight", p.Character)
-                h.Name = "NX"; h.FillColor = Color3.new(1, 0, 0)
-            else
-                if p.Character:FindFirstChild("NX") then p.Character.NX:Destroy() end
-            end
+-- FIXED CHAMS USING ROBLOX HIGHLIGHT OBJECT
+f["Chams"] = function(s)
+    _G.ChamsEnabled = s
+    local function applyChams(char)
+        if not char then return end
+        if s then
+            local h = char:FindFirstChild("NicoHighlight") or Instance.new("Highlight", char)
+            h.Name = "NicoHighlight"
+            h.FillColor = Color3.fromRGB(255, 0, 0)
+            h.OutlineColor = Color3.fromRGB(255, 255, 255)
+            h.FillAlpha = 0.5
+            h.OutlineAlpha = 0
+            h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        else
+            if char:FindFirstChild("NicoHighlight") then char.NicoHighlight:Destroy() end
         end
     end
+
+    for _, v in pairs(plrs:GetPlayers()) do
+        if v ~= plrs.LocalPlayer then applyChams(v.Character) end
+    end
+
+    plrs.PlayerAdded:Connect(function(p)
+        p.CharacterAdded:Connect(function(c)
+            task.wait(0.5)
+            if _G.ChamsEnabled then applyChams(c) end
+        end)
+    end)
 end
 
 f["Full Bright"] = function(s)
     game.Lighting.Brightness = s and 2 or 1
-    game.Lighting.ClockTime = s and 12 or 14
     game.Lighting.GlobalShadows = not s
 end
-
-f["X-Ray"] = function(s)
-    for _, v in pairs(workspace:GetDescendants()) do
-        if v:IsA("BasePart") and not v:IsDescendantOf(lp.Character) then
-            v.LocalTransparencyModifier = s and 0.6 or 0
-        end
-    end
-end
-
--- [[ WORLD ENGINE ]]
-f["Gravity Switch"] = function(s) workspace.Gravity = s and 0 or 196.2 end
-
-f["Coin Magnet"] = function(s)
-    _G.Mg = s
-    task.spawn(function()
-        while _G.Mg do
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") and (v.Name:find("Coin") or v.Name:find("Gem")) then
-                    v.CFrame = lp.Character.HumanoidRootPart.CFrame
-                end
-            end
-            task.wait(0.3)
-        end
-    end)
-end
-
--- [[ REPEAT LOGIC FOR 71-140 RANGE ]]
-local list2 = {"Vehicle Fly", "Car Speed", "Boat Speed", "Plane Speed", "No Slowdown", "Ice Feet", "Moon Gravity", "Zero G", "Teleport Tool", "Box ESP", "Tracer Lines", "Name Tags", "Distance ESP", "Health Bar", "Inventory ESP", "Skeleton ESP", "Chams", "Rainbow ESP", "Item ESP", "Chest ESP", "Player Highlight", "No Fog", "Night Vision", "Wall See", "Head ESP", "View Model FOV", "Camera Zoom", "Custom Sky", "Time Changer", "Rainbow Map", "No Textures", "FPS Booster", "Low Graphics", "Remove Shadows", "Remove Particles", "Motion Blur", "Bloom Mod", "Player Finder", "NPC ESP", "Door ESP", "Trap ESP", "Hidden Item ESP", "Map Seed", "Radar", "3D Map", "Lobby ESP", "Ore ESP", "Auto Farm", "Auto Rebirth", "Auto Collect", "Auto Quest", "Auto Daily", "Loot Vacuum", "Auto Buy", "Auto Sell", "Auto Hatch", "Pet Leveler", "Gem Farmer", "Auto Clicker", "Auto Fishing", "Auto Mining", "Auto Woodcut", "Auto Strength", "Auto Agility", "Auto Stamina", "Auto Skill", "Instant Quest"}
-
-for _, n in pairs(list2) do
-    if not f[n] then
-        f[n] = function(s, v)
-            if s then
-                if n:find("Speed") then lp.Character.Humanoid.WalkSpeed = tonumber(v) or 150
-                elseif n == "Auto Clicker" then task.spawn(function() while s do mouse1click() task.wait(0.01) end end)
-                end
-            end
-        end
-    end
-end
--- [[ 🌌 NICO MYTHIC V23 - ENGINE PART C (141-200) ]]
--- [[ STATUS: UTILITY, TROLLS & DASHBOARD ]]
-
-local core = game:GetService("CoreGui")
-local lp = game:GetService("Players").LocalPlayer
-shared.NicoLogic = shared.NicoLogic or {}
+-- [[ 💀 PART D: UTILITY & TROLLS ]]
 local f = shared.NicoLogic
-local sel = shared.Selected or {}
 
--- [[ UTILITY ]]
-f["Infinite Yield"] = function(s) if s then loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end end
-f["Dex Explorer"] = function(s) if s then loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))() end end
+f["Infinite Yield"] = function(s)
+    if s then loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end
+end
 
-f["Fling Players"] = function(s, v)
+f["Dex Explorer"] = function(s)
+    if s then loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))() end
+end
+
+f["Fling Players"] = function(s)
     _G.Fl = s
     task.spawn(function()
-        local target = nil
-        for _, p in pairs(game.Players:GetPlayers()) do if p.Name:lower():find(v:lower()) then target = p end end
-        while _G.Fl and target and target.Character do
-            lp.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
-            lp.Character.HumanoidRootPart.Velocity = Vector3.new(400000, 400000, 400000)
+        while _G.Fl do
+            local r = game.Players.LocalPlayer.Character.HumanoidRootPart
+            r.Velocity = Vector3.new(0, 10000, 0)
+            r.RotVelocity = Vector3.new(0, 10000, 0)
             task.wait()
         end
     end)
-end
-
--- [[ REPEAT LOGIC FOR 141-200 RANGE ]]
-local list3 = {"Farm Multiplier", "Auto Upgrade", "Auto Feed", "Auto Clean", "Auto Sort", "Auto Open", "Auto Use", "Auto Eat", "Auto Drink", "CMD-X", "Remote Spy", "Hydroxide", "Script Dumper", "Game Explorer", "Simple Spy", "Turtle Spy", "Dark Dex", "Loop Kill", "Universal Admin", "Fake Premium", "Cape Mod", "Name Spoofer", "Rank Spoofer", "Size Changer", "Headless FE", "Korblox FE", "Rainbow Char", "Trail Mod", "Force Field", "Fire Particles", "Neon Skin", "Chat Spammer", "Anti-AFK", "Server Hop", "Rejoin Server", "Audio Logger", "FE Animations", "Giant Character", "Small Character", "Fat Character", "Thin Character", "Hat Spin", "Tornado Fling", "Nuke Server", "Lag Server", "Crash Server", "Fake Ban", "Fake Kick", "Fake Admin", "Visual Robux", "Chat Bypass", "Auto Report", "Anti Ban", "Safe Mode", "Ghost Mode", "Mythic Zenith"}
-
-for _, n in pairs(list3) do
-    if not f[n] then
-        f[n] = function(s)
-            if s then
-                if n == "Anti-AFK" then lp.Idled:Connect(function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end)
-                elseif n == "Server Hop" then game:GetService("TeleportService"):Teleport(game.PlaceId)
-                end
-            end
-        end
-    end
-end
-
--- [[ 🚀 RAINBOW DASHBOARD UI ]]
-if #sel > 0 then
-    if core:FindFirstChild("NicoActive") then core.NicoActive:Destroy() end
-    local sg = Instance.new("ScreenGui", core); sg.Name = "NicoActive"
-    local p = Instance.new("Frame", sg)
-    p.Size = UDim2.new(0, 230, 0, (#sel * 55) + 40); p.Position = UDim2.new(0.8, -240, 0.2, 0)
-    p.BackgroundColor3 = Color3.fromRGB(15, 15, 20); p.Active = true; p.Draggable = true
-    Instance.new("UICorner", p)
-    
-    local st = Instance.new("UIStroke", p)
-    st.Thickness = 6; st.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    task.spawn(function() while task.wait() do st.Color = Color3.fromHSV(tick() % 3 / 3, 1, 1) end end)
-    
-    local l = Instance.new("UIListLayout", p); l.Padding = UDim.new(0, 5); l.HorizontalAlignment = "Center"
-    Instance.new("TextLabel", p).Text = "MYTHIC V23 ACTIVE"; -- Header
-
-    for _, n in pairs(sel) do
-        local r = Instance.new("Frame", p); r.Size = UDim2.new(0.92, 0, 0, 50); r.BackgroundColor3 = Color3.fromRGB(30, 30, 35); Instance.new("UICorner", r)
-        local t = Instance.new("TextButton", r); t.Size = UDim2.new(0.9, 0, 0, 25); t.Position = UDim2.new(0.05, 0, 0.4, 0)
-        t.Text = n .. " [OFF]"; t.BackgroundColor3 = Color3.fromRGB(80, 0, 0); t.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", t)
-        
-        local on = false
-        t.MouseButton1Click:Connect(function()
-            on = not on
-            t.Text = n .. (on and " [ON]" or " [OFF]")
-            t.BackgroundColor3 = on and Color3.fromRGB(0, 120, 50) or Color3.fromRGB(80, 0, 0)
-            if f[n] then task.spawn(function() f[n](on) end) end
-        end)
-    end
 end
