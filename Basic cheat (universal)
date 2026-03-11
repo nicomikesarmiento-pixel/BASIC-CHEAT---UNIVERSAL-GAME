@@ -1,104 +1,47 @@
--- [[ 🌌 MYTHIC FACTORY V23 - 2026 ULTIMATE ]]
--- [[ STATUS: ONLINE | SERVER-SIDE BYPASS ]]
+-- [[ 🎯 NICO MYTHIC V23 - ENGINE PART A (1-50) ]]
+-- [[ STATUS: COMBAT, AIM & WEAPONS ]]
 
-local base = "https://raw.githubusercontent.com/nicomikesarmiento-pixel/BASIC-CHEAT---UNIVERSAL-GAME/refs/heads/main/"
-shared.NicoLogic = {}
-
--- [[ FAST ENGINE BOOT ]]
-local function boot(file)
-    local s, e = pcall(function() loadstring(game:HttpGet(base .. file .. ".lua"))() end)
-    if not s then warn("Nico Error: " .. file .. " -> " .. e) end
-end
-
--- Load Databases (A-D)
-boot("Part_A") -- 1-50
-boot("Part_B") -- 51-100
-boot("Part_C") -- 101-150
-boot("Part_D") -- 151-200
-
--- [[ 🌈 DASHBOARD WITH HIDE/SHOW ]]
-local core = game:GetService("CoreGui")
-if core:FindFirstChild("Nico_V23") then core.Nico_V23:Destroy() end
-
-local sg = Instance.new("ScreenGui", core)
-sg.Name = "Nico_V23"
-
--- HIDE/SHOW ICON
-local icon = Instance.new("ImageButton", sg)
-icon.Size = UDim2.new(0, 45, 0, 45)
-icon.Position = UDim2.new(0.95, -50, 0.45, 0)
-icon.BackgroundColor3 = Color3.fromRGB(0, 255, 180)
-icon.Image = "rbxassetid://6031070908"
-Instance.new("UICorner", icon).CornerRadius = UDim.new(1,0)
-icon.Draggable = true
-
-local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 250, 0, 380)
-main.Position = UDim2.new(0.8, 0, 0.3, 0)
-main.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
-main.Visible = true
-main.Draggable = true
-Instance.new("UICorner", main)
-
-local stroke = Instance.new("UIStroke", main); stroke.Thickness = 3
-task.spawn(function() while task.wait() do stroke.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1) end end)
-
-icon.MouseButton1Click:Connect(function() main.Visible = not main.Visible end)
-
-local scroll = Instance.new("ScrollingFrame", main)
-scroll.Size = UDim2.new(1, -10, 1, -40); scroll.Position = UDim2.new(0, 5, 0, 35)
-scroll.BackgroundTransparency = 1; scroll.CanvasSize = UDim2.new(0,0,0, 4000)
-Instance.new("UIListLayout", scroll).HorizontalAlignment = "Center"
-
--- Generate Buttons (Individual Logic)
-for _, n in pairs(shared.Selected or {}) do
-    local b = Instance.new("TextButton", scroll)
-    b.Size = UDim2.new(0.9, 0, 0, 38); b.Text = n .. " [OFF]"
-    b.BackgroundColor3 = Color3.fromRGB(45, 5, 5); b.TextColor3 = Color3.new(1,1,1)
-    b.Font = Enum.Font.GothamBold; Instance.new("UICorner", b)
-
-    local active = false
-    b.MouseButton1Click:Connect(function()
-        active = not active
-        b.Text = n .. (active and " [ON]" or " [OFF]")
-        b.BackgroundColor3 = active and Color3.fromRGB(0, 140, 70) or Color3.fromRGB(45, 5, 5)
-        if shared.NicoLogic[n] then task.spawn(function() shared.NicoLogic[n](active) end) end
-    end)
-end
--- [[ 🎯 PART A: COMBAT & TARGETING ]]
-local f = shared.NicoLogic
 local plrs = game:GetService("Players")
 local lp = plrs.LocalPlayer
+local mouse = lp:GetMouse()
+local run = game:GetService("RunService")
 
+shared.NicoLogic = shared.NicoLogic or {}
+local f = shared.NicoLogic
+
+-- [[ 1-10: CORE COMBAT ]]
 f["Aimbot v2"] = function(s)
-    _G.Ab = s
+    _G.Aimbot = s
     task.spawn(function()
-        while _G.Ab do
-            local target, dist = nil, 1000
+        while _G.Aimbot do
+            local target, closest = nil, math.huge
             for _, v in pairs(plrs:GetPlayers()) do
                 if v ~= lp and v.Character and v.Character:FindFirstChild("Head") then
-                    local p, vis = workspace.CurrentCamera:WorldToViewportPoint(v.Character.Head.Position)
+                    local pos, vis = workspace.CurrentCamera:WorldToViewportPoint(v.Character.Head.Position)
                     if vis then
-                        local m = (Vector2.new(p.X, p.Y) - game:GetService("UserInputService"):GetMouseLocation()).Magnitude
-                        if m < dist then dist = m; target = v end
+                        local mag = (Vector2.new(pos.X, pos.Y) - game:GetService("UserInputService"):GetMouseLocation()).Magnitude
+                        if mag < closest then closest = mag; target = v end
                     end
                 end
             end
-            if target then workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.Head.Position) end
+            if target then
+                workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.Head.Position)
+            end
             task.wait()
         end
     end)
 end
 
 f["Kill Aura"] = function(s)
-    _G.Ka = s
+    _G.KillAura = s
     task.spawn(function()
-        while _G.Ka do
+        while _G.KillAura do
             for _, v in pairs(plrs:GetPlayers()) do
                 if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                    if (lp.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude < 20 then
-                        local t = lp.Character:FindFirstChildOfClass("Tool")
-                        if t then t:Activate() end
+                    local dist = (lp.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude
+                    if dist < 20 then
+                        local tool = lp.Character:FindFirstChildOfClass("Tool")
+                        if tool then tool:Activate() end
                     end
                 end
             end
@@ -106,30 +49,56 @@ f["Kill Aura"] = function(s)
         end
     end)
 end
--- [[ 🏃 PART B: MOVEMENT & SPEED ]]
-local f = shared.NicoLogic
+
+f["Silent Aim"] = function(s) _G.SilentAim = s end
+f["Hitbox Expander"] = function(s)
+    _G.Hitbox = s
+    task.spawn(function()
+        while _G.Hitbox do
+            for _, v in pairs(plrs:GetPlayers()) do
+                if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    v.Character.HumanoidRootPart.Size = Vector3.new(10, 10, 10)
+                    v.Character.HumanoidRootPart.Transparency = 0.7
+                end
+            end
+            task.wait(1)
+        end
+    end)
+end
+
+-- [[ 11-50: WEAPON MODS PLACEHOLDERS ]]
+local combatExtra = {"Trigger Bot", "Reach Hack", "No Recoil", "Instant Reload", "Rapid Fire", "Auto Parry", "Block Spammer", "Knife Aura", "Bullet Tracers", "Headshot Only"}
+for _, name in pairs(combatExtra) do
+    f[name] = function(s) print(name .. " status: " .. tostring(s)) end
+end
+-- [[ 🏃 NICO MYTHIC V23 - ENGINE PART B (51-100) ]]
+-- [[ STATUS: MOVEMENT, SPEED & PHYSICS ]]
+
 local lp = game:GetService("Players").LocalPlayer
+shared.NicoLogic = shared.NicoLogic or {}
+local f = shared.NicoLogic
 
 f["Speed Hack"] = function(s)
-    _G.Sp = s
+    _G.Speed = s
     task.spawn(function()
-        while _G.Sp do 
+        while _G.Speed do
             if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-                lp.Character.Humanoid.WalkSpeed = 100 
+                lp.Character.Humanoid.WalkSpeed = 100
             end
-            task.wait() 
+            task.wait()
         end
-        if lp.Character then lp.Character.Humanoid.WalkSpeed = 16 end
+        lp.Character.Humanoid.WalkSpeed = 16
     end)
 end
 
 f["Fly Hack v4"] = function(s)
-    _G.Fly = s
+    _G.Flying = s
     if s then
         local bv = Instance.new("BodyVelocity", lp.Character.HumanoidRootPart)
-        bv.MaxForce = Vector3.new(1,1,1) * 10^6
+        bv.Name = "NicoFlyV23"
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
         task.spawn(function()
-            while _G.Fly do
+            while _G.Flying do
                 bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * 100
                 task.wait()
             end
@@ -137,45 +106,90 @@ f["Fly Hack v4"] = function(s)
         end)
     end
 end
--- [[ 👁️ PART C: ROBLOX NATIVE HIGHLIGHT VISUALS ]]
-local f = shared.NicoLogic
-local plrs = game:GetService("Players")
 
--- FIXED CHAMS USING ROBLOX HIGHLIGHT OBJECT
+f["No Clip"] = function(s)
+    _G.NoClip = s
+    game:GetService("RunService").Stepped:Connect(function()
+        if _G.NoClip and lp.Character then
+            for _, v in pairs(lp.Character:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = false end
+            end
+        end
+    end)
+end
+
+f["Infinite Jump"] = function(s)
+    _G.InfJump = s
+    game:GetService("UserInputService").JumpRequest:Connect(function()
+        if _G.InfJump then lp.Character.Humanoid:ChangeState("Jumping") end
+    end)
+end
+
+-- [[ 60-100: MOVEMENT EXTRAS ]]
+local moveExtra = {"God Mode", "Invisible FE", "Bhop", "Spider Climb", "Teleport Click", "Gravity Switch", "Air Walk", "Anti-Fling", "High Jump", "Zero G"}
+for _, name in pairs(moveExtra) do
+    f[name] = function(s) print(name .. " status: " .. tostring(s)) end
+end
+-- [[ 👁️ NICO MYTHIC V23 - ENGINE PART C (101-150) ]]
+-- [[ STATUS: VISUALS, ESP & CHAMS ]]
+
+local plrs = game:GetService("Players")
+shared.NicoLogic = shared.NicoLogic or {}
+local f = shared.NicoLogic
+
+-- [[ 101: THE SOLID CHAMS (ROBLOX HIGHLIGHT) ]]
 f["Chams"] = function(s)
     _G.ChamsEnabled = s
-    local function applyChams(char)
+    
+    local function apply(char)
         if not char then return end
         if s then
-            local h = char:FindFirstChild("NicoHighlight") or Instance.new("Highlight", char)
-            h.Name = "NicoHighlight"
+            local h = char:FindFirstChild("NicoV23_Highlight") or Instance.new("Highlight", char)
+            h.Name = "NicoV23_Highlight"
             h.FillColor = Color3.fromRGB(255, 0, 0)
             h.OutlineColor = Color3.fromRGB(255, 255, 255)
             h.FillAlpha = 0.5
-            h.OutlineAlpha = 0
             h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
         else
-            if char:FindFirstChild("NicoHighlight") then char.NicoHighlight:Destroy() end
+            if char:FindFirstChild("NicoV23_Highlight") then char.NicoV23_Highlight:Destroy() end
         end
     end
 
     for _, v in pairs(plrs:GetPlayers()) do
-        if v ~= plrs.LocalPlayer then applyChams(v.Character) end
+        if v ~= plrs.LocalPlayer then apply(v.Character) end
     end
 
-    plrs.PlayerAdded:Connect(function(p)
-        p.CharacterAdded:Connect(function(c)
-            task.wait(0.5)
-            if _G.ChamsEnabled then applyChams(c) end
+    -- Auto-apply on spawn
+    if s and not _G.ChamsLoop then
+        _G.ChamsLoop = true
+        plrs.PlayerAdded:Connect(function(p)
+            p.CharacterAdded:Connect(function(c)
+                task.wait(0.5)
+                if _G.ChamsEnabled then apply(c) end
+            end)
         end)
-    end)
+    end
 end
 
 f["Full Bright"] = function(s)
-    game.Lighting.Brightness = s and 2 or 1
-    game.Lighting.GlobalShadows = not s
+    if s then
+        game.Lighting.Ambient = Color3.new(1,1,1)
+        game.Lighting.Brightness = 2
+    else
+        game.Lighting.Ambient = Color3.new(0,0,0)
+        game.Lighting.Brightness = 1
+    end
 end
--- [[ 💀 PART D: UTILITY & TROLLS ]]
+
+-- [[ 110-150: VISUAL EXTRAS ]]
+local visualExtra = {"Box ESP", "Tracer Lines", "Name Tags", "Health Bar", "X-Ray", "Rainbow ESP", "Night Vision", "No Fog", "FPS Booster", "Low Graphics"}
+for _, name in pairs(visualExtra) do
+    f[name] = function(s) print(name .. " status: " .. tostring(s)) end
+end
+-- [[ 🛠️ NICO MYTHIC V23 - ENGINE PART D (151-200) ]]
+-- [[ STATUS: UTILITY, TROLLS & AUTO-FARM ]]
+
+shared.NicoLogic = shared.NicoLogic or {}
 local f = shared.NicoLogic
 
 f["Infinite Yield"] = function(s)
@@ -187,13 +201,19 @@ f["Dex Explorer"] = function(s)
 end
 
 f["Fling Players"] = function(s)
-    _G.Fl = s
+    _G.Fling = s
     task.spawn(function()
-        while _G.Fl do
-            local r = game.Players.LocalPlayer.Character.HumanoidRootPart
-            r.Velocity = Vector3.new(0, 10000, 0)
-            r.RotVelocity = Vector3.new(0, 10000, 0)
+        while _G.Fling do
+            local hrp = game.Players.LocalPlayer.Character.HumanoidRootPart
+            hrp.Velocity = Vector3.new(0, 10000, 0)
+            hrp.RotVelocity = Vector3.new(0, 10000, 0)
             task.wait()
         end
     end)
+end
+
+-- [[ 160-200: UTILITY & TROLLS ]]
+local utilExtra = {"Universal Admin", "Fake Premium", "Cape Mod", "Name Spoofer", "Server Hop", "Chat Spammer", "Anti-AFK", "Auto Rebirth", "Coin Magnet", "Mythic Zenith"}
+for _, name in pairs(utilExtra) do
+    f[name] = function(s) print(name .. " status: " .. tostring(s)) end
 end
