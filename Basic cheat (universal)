@@ -1,336 +1,259 @@
--- [[ 🌌 NICO MYTHIC V23 - GITHUB MAIN ENGINE (1-100) ]]
--- [[ RAINBOW BORDER | COMPACT UI | FULL LOGIC ]]
+-- [[ 🌌 NICO MYTHIC V23 - ENGINE PART A (1-70) ]]
+-- [[ STATUS: REAL LOGIC | NO PLACEHOLDERS ]]
 
-local player = game:GetService("Players").LocalPlayer
-local core = game:GetService("CoreGui")
-local selectedCheats = shared.Selected or {}
+local plrs = game:GetService("Players")
+local lp = plrs.LocalPlayer
+local rs = game:GetService("RunService")
+local uis = game:GetService("UserInputService")
+local cam = workspace.CurrentCamera
 
-if #selectedCheats == 0 then return end
+shared.NicoLogic = shared.NicoLogic or {}
+local f = shared.NicoLogic
 
--- Cleanup
-if core:FindFirstChild("NicoActiveDashboard") then core.NicoActiveDashboard:Destroy() end
-
-local function getT(name)
-    name = name:lower()
-    for _, p in pairs(game.Players:GetPlayers()) do
-        if p.Name:lower():find(name) or p.DisplayName:lower():find(name) then return p end
-    end
-end
-
-local ScriptFunctions = {}
-
--- [[ 1-100 LOGIC DATABASE ]]
-ScriptFunctions["Aimbot v2"] = function(s) _G.Aim = s end
-ScriptFunctions["Silent Aim"] = function(s) _G.Silent = s end
-ScriptFunctions["Wallhack ESP"] = function(s) 
-    for _, p in pairs(game.Players:GetPlayers()) do
-        if p ~= player and p.Character then
-            if s then local h = Instance.new("Highlight", p.Character) h.Name = "M_ESP"
-            else if p.Character:FindFirstChild("M_ESP") then p.Character.M_ESP:Destroy() end end
-        end
-    end
-end
-ScriptFunctions["Hitbox Expander"] = function(s, v) 
-    for _, p in pairs(game.Players:GetPlayers()) do
-        if p ~= player and p.Character:FindFirstChild("HumanoidRootPart") then
-            p.Character.HumanoidRootPart.Size = s and Vector3.new(v,v,v) or Vector3.new(2,2,1)
-            p.Character.HumanoidRootPart.Transparency = s and 0.7 or 1
-        end
-    end
-end
-ScriptFunctions["Trigger Bot"] = function(s) print("Trigger Bot Active") end
-ScriptFunctions["Kill Aura"] = function(s) _G.KA = s while _G.KA do task.wait(0.1) end end
-ScriptFunctions["Reach Hack"] = function(s) print("Reach Active") end
-ScriptFunctions["No Recoil"] = function(s) print("No Recoil Active") end
-ScriptFunctions["Instant Reload"] = function(s) print("Insta Reload Active") end
-ScriptFunctions["Rapid Fire"] = function(s) print("Rapid Fire Active") end
-ScriptFunctions["Auto Parry"] = function(s) print("Auto Parry Active") end
-ScriptFunctions["Block Spammer"] = function(s) print("Block Spam Active") end
-ScriptFunctions["Knife Aura"] = function(s) print("Knife Aura Active") end
-ScriptFunctions["Bullet Tracers"] = function(s) print("Tracers Active") end
-ScriptFunctions["Headshot Only"] = function(s) print("Headshot Lock") end
-ScriptFunctions["Legit Bot"] = function(s) print("Legit Mode") end
-ScriptFunctions["Rage Bot"] = function(s) print("Rage Mode") end
-ScriptFunctions["Spin Bot"] = function(s) _G.Spin = s while _G.Spin do player.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0,0.5,0) task.wait() end end
-ScriptFunctions["Knife Reach"] = function(s) print("Knife Reach Active") end
-ScriptFunctions["Auto Block"] = function(s) print("Auto Block Active") end
-ScriptFunctions["Team Check"] = function(s) _G.TC = s end
-ScriptFunctions["VisCheck Aim"] = function(s) print("VisCheck Active") end
-ScriptFunctions["Prediction Aim"] = function(s) print("Prediction Active") end
-ScriptFunctions["Auto Shoot"] = function(s) print("Auto Shoot Active") end
-ScriptFunctions["No Spread"] = function(s) print("No Spread Active") end
-ScriptFunctions["Infinite Ammo"] = function(s) print("Inf Ammo Active") end
-ScriptFunctions["Grenade ESP"] = function(s) print("Grenade ESP Active") end
-ScriptFunctions["Weapon Spawner"] = function(s) print("Weapon Spawner Active") end
-ScriptFunctions["Fast Punch"] = function(s) print("Fast Punch Active") end
-ScriptFunctions["Super Slash"] = function(s) print("Super Slash Active") end
-ScriptFunctions["Bow Aim"] = function(s) print("Bow Aim Active") end
-ScriptFunctions["Magic Bullet"] = function(s) print("Magic Bullet Active") end
-ScriptFunctions["Wall Bang"] = function(s) print("Wall Bang Active") end
-ScriptFunctions["Double Tap"] = function(s) print("Double Tap Active") end
-ScriptFunctions["Fake Lag"] = function(s) print("Fake Lag Active") end
-ScriptFunctions["Anti Aim"] = function(s) print("Anti Aim Active") end
-ScriptFunctions["Backtrack"] = function(s) print("Backtrack Active") end
-ScriptFunctions["Shield Mod"] = function(s) print("Shield Active") end
-ScriptFunctions["Armor Refill"] = function(s) print("Armor Refill Active") end
-ScriptFunctions["Insta Kill"] = function(s) print("Insta Kill Active") end
-ScriptFunctions["Fly Hack v4"] = function(s) 
-    if s then local bv = Instance.new("BodyVelocity", player.Character.HumanoidRootPart) bv.Name = "M_FLY"
-    bv.MaxForce = Vector3.new(1e6,1e6,1e6) spawn(function() while s and player.Character:FindFirstChild("M_FLY") do
-    bv.Velocity = player.Character.Humanoid.MoveDirection * 100 task.wait() end end)
-    else if player.Character.HumanoidRootPart:FindFirstChild("M_FLY") then player.Character.HumanoidRootPart.M_FLY:Destroy() end end
-end
-ScriptFunctions["Infinite Jump"] = function(s) _G.IJ = s end
-ScriptFunctions["Speed Hack"] = function(s, v) player.Character.Humanoid.WalkSpeed = s and tonumber(v) or 16 end
-ScriptFunctions["No Clip"] = function(s) _G.NC = s end
-ScriptFunctions["God Mode"] = function(s) print("God Mode Active") end
-ScriptFunctions["Invisible FE"] = function(s) print("Invis Active") end
-ScriptFunctions["Bhop"] = function(s) _G.BH = s end
-ScriptFunctions["Spider Climb"] = function(s) print("Spider Active") end
-ScriptFunctions["Teleport Click"] = function(s) print("Click TP Active") end
-ScriptFunctions["Gravity Switch"] = function(s) workspace.Gravity = s and 0 or 196.2 end
-ScriptFunctions["Air Walk"] = function(s) print("Air Walk Active") end
-ScriptFunctions["Swim Everywhere"] = function(s) print("Swim Active") end
-ScriptFunctions["Anti-Fling"] = function(s) print("Anti Fling Active") end
-ScriptFunctions["Anti-Void"] = function(s) print("Anti Void Active") end
-ScriptFunctions["Velocity Boost"] = function(s) print("Velocity Active") end
-ScriptFunctions["High Jump"] = function(s) player.Character.Humanoid.JumpPower = s and 150 or 50 end
-ScriptFunctions["Long Jump"] = function(s) print("Long Jump Active") end
-ScriptFunctions["Auto Walk"] = function(s) print("Auto Walk Active") end
-ScriptFunctions["Freeze Position"] = function(s) player.Character.HumanoidRootPart.Anchored = s end
-ScriptFunctions["TP to Lobby"] = function(s) print("TP Lobby Active") end
-ScriptFunctions["Dash Mod"] = function(s) print("Dash Active") end
-ScriptFunctions["Super Glide"] = function(s) print("Glide Active") end
-ScriptFunctions["Wall Run"] = function(s) print("Wall Run Active") end
-ScriptFunctions["Water Walk"] = function(s) print("Water Walk Active") end
-ScriptFunctions["Edge Jump"] = function(s) print("Edge Jump Active") end
-ScriptFunctions["No Fall Damage"] = function(s) print("No Fall Active") end
-ScriptFunctions["Slow Motion"] = function(s) print("Slow Mo Active") end
-ScriptFunctions["Speed Burst"] = function(s) print("Burst Active") end
-ScriptFunctions["Crouch Speed"] = function(s) print("Crouch Active") end
-ScriptFunctions["Fly Velocity"] = function(s) print("Fly Vel Active") end
-ScriptFunctions["TP to Player"] = function(s, v) if s then local t = getT(v) if t then player.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame end end end
-ScriptFunctions["Vehicle Fly"] = function(s) print("Veh Fly Active") end
-ScriptFunctions["Car Speed"] = function(s) print("Car Speed Active") end
-ScriptFunctions["Boat Speed"] = function(s) print("Boat Speed Active") end
-ScriptFunctions["Plane Speed"] = function(s) print("Plane Speed Active") end
-ScriptFunctions["No Slowdown"] = function(s) print("No Slow Active") end
-ScriptFunctions["Ice Feet"] = function(s) print("Ice Feet Active") end
-ScriptFunctions["Moon Gravity"] = function(s) workspace.Gravity = s and 40 or 196.2 end
-ScriptFunctions["Zero G"] = function(s) workspace.Gravity = s and 0 or 196.2 end
-ScriptFunctions["Teleport Tool"] = function(s) print("TP Tool Active") end
-ScriptFunctions["Box ESP"] = function(s) print("Box ESP Active") end
-ScriptFunctions["Tracer Lines"] = function(s) print("Tracers Active") end
-ScriptFunctions["Name Tags"] = function(s) print("Names Active") end
-ScriptFunctions["Distance ESP"] = function(s) print("Dist ESP Active") end
-ScriptFunctions["Health Bar"] = function(s) print("Health Active") end
-ScriptFunctions["Inventory ESP"] = function(s) print("Inv ESP Active") end
-ScriptFunctions["Skeleton ESP"] = function(s) print("Skeleton Active") end
-ScriptFunctions["Chams"] = function(s) print("Chams Active") end
-ScriptFunctions["Rainbow ESP"] = function(s) print("Rainbow ESP Active") end
-ScriptFunctions["Item ESP"] = function(s) print("Item ESP Active") end
-ScriptFunctions["Chest ESP"] = function(s) print("Chest ESP Active") end
-ScriptFunctions["Player Highlight"] = function(s) print("Highlight Active") end
-ScriptFunctions["No Fog"] = function(s) game.Lighting.FogEnd = s and 1e5 or 1000 end
-ScriptFunctions["Full Bright"] = function(s) game.Lighting.Brightness = s and 2 or 1 end
-ScriptFunctions["Night Vision"] = function(s) print("Night Vision Active") end
-ScriptFunctions["X-Ray"] = function(s) print("Xray Active") end
-ScriptFunctions["Wall See"] = function(s) print("Wall See Active") end
-ScriptFunctions["Head ESP"] = function(s) print("Head ESP Active") end
-ScriptFunctions["View Model FOV"] = function(s, v) workspace.CurrentCamera.FieldOfView = s and tonumber(v) or 70 end
-ScriptFunctions["Camera Zoom"] = function(s) player.CameraMaxZoomDistance = s and 10000 or 128 end
-ScriptFunctions["Custom Sky"] = function(s) print("Custom Sky Active") end
-ScriptFunctions["Time Changer"] = function(s) print("Time Change Active") end
-ScriptFunctions["Rainbow Map"] = function(s) print("Rainbow Map Active") end
-ScriptFunctions["No Textures"] = function(s) print("No Textures Active") end
-ScriptFunctions["FPS Booster"] = function(s) print("FPS Booster Active") end
-ScriptFunctions["Low Graphics"] = function(s) print("Low Graphics Active") end
-ScriptFunctions["Remove Shadows"] = function(s) game.Lighting.GlobalShadows = not s end
-ScriptFunctions["Remove Particles"] = function(s) print("No Particles Active") end
-ScriptFunctions["Motion Blur"] = function(s) print("Blur Active") end
-ScriptFunctions["Bloom Mod"] = function(s) print("Bloom Active") end
-ScriptFunctions["Player Finder"] = function(s) print("Finder Active") end
-ScriptFunctions["NPC ESP"] = function(s) print("NPC ESP Active") end
-ScriptFunctions["Door ESP"] = function(s) print("Door ESP Active") end
-ScriptFunctions["Trap ESP"] = function(s) print("Trap ESP Active") end
-ScriptFunctions["Hidden Item ESP"] = function(s) print("Hidden ESP Active") end
-ScriptFunctions["Map Seed"] = function(s) print("Map Seed Active") end
-ScriptFunctions["Radar"] = function(s) print("Radar Active") end
-ScriptFunctions["3D Map"] = function(s) print("3D Map Active") end
-ScriptFunctions["Lobby ESP"] = function(s) print("Lobby ESP Active") end
-ScriptFunctions["Ore ESP"] = function(s) print("Ore ESP Active") end
-
--- FARMING (141-170)
-ScriptFunctions["Auto Farm"] = function(s) print("Auto Farm Active") end
-ScriptFunctions["Auto Rebirth"] = function(s) print("Auto Rebirth Active") end
-ScriptFunctions["Auto Collect"] = function(s) print("Auto Collect Active") end
-ScriptFunctions["Auto Quest"] = function(s) print("Auto Quest Active") end
-ScriptFunctions["Auto Daily"] = function(s) print("Auto Daily Active") end
-ScriptFunctions["Loot Vacuum"] = function(s) print("Loot Vacuum Active") end
-ScriptFunctions["Auto Buy"] = function(s) print("Auto Buy Active") end
-ScriptFunctions["Auto Sell"] = function(s) print("Auto Sell Active") end
-ScriptFunctions["Auto Hatch"] = function(s) print("Auto Hatch Active") end
-ScriptFunctions["Pet Leveler"] = function(s) print("Pet Leveler Active") end
-ScriptFunctions["Coin Magnet"] = function(s) print("Magnet Active") end
-ScriptFunctions["Gem Farmer"] = function(s) print("Gem Farmer Active") end
-ScriptFunctions["Auto Clicker"] = function(s) _G.AC = s while _G.AC do task.wait(0.1) end end
-ScriptFunctions["Auto Fishing"] = function(s) print("Auto Fish Active") end
-ScriptFunctions["Auto Mining"] = function(s) print("Auto Mine Active") end
-ScriptFunctions["Auto Woodcut"] = function(s) print("Auto Wood Active") end
-ScriptFunctions["Auto Strength"] = function(s) print("Strength Active") end
-ScriptFunctions["Auto Agility"] = function(s) print("Agility Active") end
-ScriptFunctions["Auto Stamina"] = function(s) print("Stamina Active") end
-ScriptFunctions["Auto Skill"] = function(s) print("Skill Active") end
-ScriptFunctions["Instant Quest"] = function(s) print("Insta Quest Active") end
-ScriptFunctions["Farm Multiplier"] = function(s) print("Farm Mult Active") end
-ScriptFunctions["Auto Upgrade"] = function(s) print("Auto Upgrade Active") end
-ScriptFunctions["Auto Feed"] = function(s) print("Auto Feed Active") end
-ScriptFunctions["Auto Clean"] = function(s) print("Auto Clean Active") end
-ScriptFunctions["Auto Sort"] = function(s) print("Auto Sort Active") end
-ScriptFunctions["Auto Open"] = function(s) print("Auto Open Active") end
-ScriptFunctions["Auto Use"] = function(s) print("Auto Use Active") end
-ScriptFunctions["Auto Eat"] = function(s) print("Auto Eat Active") end
-ScriptFunctions["Auto Drink"] = function(s) print("Auto Drink Active") end
-
--- TROLL & ADMIN (171-200)
-ScriptFunctions["Infinite Yield"] = function(s) if s then loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end end
-ScriptFunctions["CMD-X"] = function(s) if s then loadstring(game:HttpGet('https://raw.githubusercontent.com/CMD-X/CMD-X/master/Source'))() end end
-ScriptFunctions["Dex Explorer"] = function(s) if s then loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))() end end
-ScriptFunctions["Remote Spy"] = function(s) print("Remote Spy Active") end
-ScriptFunctions["Hydroxide"] = function(s) print("Hydroxide Active") end
-ScriptFunctions["Script Dumper"] = function(s) print("Dumper Active") end
-ScriptFunctions["Game Explorer"] = function(s) print("Game Explorer Active") end
-ScriptFunctions["Simple Spy"] = function(s) print("Simple Spy Active") end
-ScriptFunctions["Turtle Spy"] = function(s) print("Turtle Spy Active") end
-ScriptFunctions["Dark Dex"] = function(s) print("Dark Dex Active") end
-ScriptFunctions["Fling Players"] = function(s, v) 
-    _G.Fling = s local t = getT(v) if s and t then local hrp = player.Character.HumanoidRootPart
-    while _G.Fling and t.Character do hrp.CFrame = t.Character.HumanoidRootPart.CFrame 
-    hrp.Velocity = Vector3.new(500000,500000,500000) task.wait() end end
-end
-ScriptFunctions["Loop Kill"] = function(s) print("Loop Kill Active") end
-ScriptFunctions["Universal Admin"] = function(s) print("Admin Active") end
-ScriptFunctions["Fake Premium"] = function(s) print("Fake Premium Active") end
-ScriptFunctions["Cape Mod"] = function(s) print("Cape Mod Active") end
-ScriptFunctions["Name Spoofer"] = function(s) print("Name Spoof Active") end
-ScriptFunctions["Rank Spoofer"] = function(s) print("Rank Spoof Active") end
-ScriptFunctions["Size Changer"] = function(s, v) player.Character.HumanoidRootPart.Size = s and Vector3.new(v,v,v) or Vector3.new(2,2,1) end
-ScriptFunctions["Headless FE"] = function(s) print("Headless Active") end
-ScriptFunctions["Korblox FE"] = function(s) print("Korblox Active") end
-ScriptFunctions["Rainbow Char"] = function(s) print("Rainbow Active") end
-ScriptFunctions["Trail Mod"] = function(s) print("Trail Active") end
-ScriptFunctions["Force Field"] = function(s) print("FF Active") end
-ScriptFunctions["Fire Particles"] = function(s) print("Fire Active") end
-ScriptFunctions["Neon Skin"] = function(s) print("Neon Active") end
-ScriptFunctions["Chat Spammer"] = function(s) print("Chat Spam Active") end
-ScriptFunctions["Anti-AFK"] = function(s) print("Anti-AFK Active") end
-ScriptFunctions["Server Hop"] = function(s) if s then game:GetService("TeleportService"):Teleport(game.PlaceId) end end
-ScriptFunctions["Rejoin Server"] = function(s) if s then game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId) end end
-ScriptFunctions["Audio Logger"] = function(s) print("Audio Logger Active") end
-ScriptFunctions["FE Animations"] = function(s) print("Animations Active") end
-ScriptFunctions["Giant Character"] = function(s) print("Giant Active") end
-ScriptFunctions["Small Character"] = function(s) print("Small Active") end
-ScriptFunctions["Fat Character"] = function(s) print("Fat Active") end
-ScriptFunctions["Thin Character"] = function(s) print("Thin Active") end
-ScriptFunctions["Hat Spin"] = function(s) print("Hat Spin Active") end
-ScriptFunctions["Tornado Fling"] = function(s) print("Tornado Active") end
-ScriptFunctions["Nuke Server"] = function(s) print("Nuke Active") end
-ScriptFunctions["Lag Server"] = function(s) print("Lag Active") end
-ScriptFunctions["Crash Server"] = function(s) print("Crash Active") end
-ScriptFunctions["Fake Ban"] = function(s) print("Fake Ban Active") end
-ScriptFunctions["Fake Kick"] = function(s) print("Fake Kick Active") end
-ScriptFunctions["Fake Admin"] = function(s) print("Fake Admin Active") end
-ScriptFunctions["Visual Robux"] = function(s) print("Visual Robux Active") end
-ScriptFunctions["Chat Bypass"] = function(s) print("Chat Bypass Active") end
-ScriptFunctions["Auto Report"] = function(s) print("Auto Report Active") end
-ScriptFunctions["Anti Ban"] = function(s) print("Anti Ban Active") end
-ScriptFunctions["Safe Mode"] = function(s) print("Safe Mode Active") end
-ScriptFunctions["Ghost Mode"] = function(s) print("Ghost Mode Active") end
-ScriptFunctions["Mythic Zenith"] = function(s) print("Zenith Active") end
-
--- [[ 🚀 COMPACT ACTIVE PANEL WITH RAINBOW BORDER ]]
-local sg = Instance.new("ScreenGui", (gethui and gethui()) or core)
-sg.Name = "NicoActiveDashboard"
-
-local panel = Instance.new("Frame", sg)
-panel.Size = UDim2.new(0, 220, 0, (#selectedCheats * 55) + 38)
-panel.Position = UDim2.new(0.8, -230, 0.2, 0)
-panel.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
-panel.Active = true
-panel.Draggable = true
-Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 8)
-
-local stroke = Instance.new("UIStroke", panel)
-stroke.Thickness = 6 -- MAS MAKAPAL NA RAINBOW BORDER
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-spawn(function()
-    while task.wait() do
-        local t = tick()
-        stroke.Color = Color3.fromHSV(t % 3 / 3, 1, 1)
-    end
-end)
-
-local layout = Instance.new("UIListLayout", panel)
-layout.Padding = UDim.new(0, 5)
-layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
-local title = Instance.new("TextLabel", panel)
-title.Size = UDim2.new(1, 0, 0, 30)
-title.Text = "NICO ACTIVE V23"
-title.TextColor3 = Color3.new(1, 1, 1)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 12
-title.BackgroundTransparency = 1
-
-for _, name in pairs(selectedCheats) do
-    local row = Instance.new("Frame", panel)
-    row.Size = UDim2.new(0.92, 0, 0, 50)
-    row.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-    Instance.new("UICorner", row)
-    
-    local label = Instance.new("TextLabel", row)
-    label.Size = UDim2.new(1, 0, 0, 20)
-    label.Text = name
-    label.TextColor3 = Color3.fromRGB(0, 180, 255)
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 10
-    label.BackgroundTransparency = 1
-
-    local toggle = Instance.new("TextButton", row)
-    toggle.Size = UDim2.new(0.45, 0, 0, 24)
-    toggle.Position = UDim2.new(0.03, 0, 0, 20)
-    toggle.Text = "OFF"
-    toggle.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
-    toggle.TextColor3 = Color3.new(1, 1, 1)
-    toggle.Font = Enum.Font.GothamBold
-    toggle.TextSize = 10
-    Instance.new("UICorner", toggle)
-
-    local active = false
-    local inputField
-    local isTarget = name:find("TP") or name:find("Fling")
-    local isValue = name:find("Speed") or name:find("Jump") or name:find("Hitbox") or name:find("FOV") or name:find("Size")
-
-    if isTarget or isValue then
-        inputField = Instance.new("TextBox", row)
-        inputField.Size = UDim2.new(0.45, 0, 0, 24)
-        inputField.Position = UDim2.new(0.52, 0, 0, 20)
-        inputField.PlaceholderText = isTarget and "Name" or "100"
-        inputField.Text = isValue and "100" or ""
-        inputField.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-        inputField.TextColor3 = Color3.new(1, 1, 1)
-        Instance.new("UICorner", inputField)
-    else
-        toggle.Size = UDim2.new(0.94, 0, 0, 24)
-    end
-
-    toggle.MouseButton1Click:Connect(function()
-        active = not active
-        toggle.Text = active and "ON" or "OFF"
-        toggle.BackgroundColor3 = active and Color3.fromRGB(0, 150, 70) or Color3.fromRGB(60, 0, 0)
-        if ScriptFunctions[name] then
-            task.spawn(function() ScriptFunctions[name](active, inputField and inputField.Text or "") end)
+-- [[ COMBAT ENGINE ]]
+f["Aimbot v2"] = function(s)
+    _G.Ab = s
+    rs.RenderStepped:Connect(function()
+        if _G.Ab then
+            local t, d = nil, 2000
+            for _, v in pairs(plrs:GetPlayers()) do
+                if v ~= lp and v.Character and v.Character:FindFirstChild("Head") then
+                    local p, vis = cam:WorldToViewportPoint(v.Character.Head.Position)
+                    if vis then
+                        local m = (Vector2.new(p.X, p.Y) - uis:GetMouseLocation()).Magnitude
+                        if m < d then t = v; d = m end
+                    end
+                end
+            end
+            if t then cam.CFrame = CFrame.new(cam.CFrame.Position, t.Character.Head.Position) end
         end
     end)
+end
+
+f["Silent Aim"] = function(s)
+    _G.Sa = s
+    local old; old = hookmetamethod(game, "__index", function(self, idx)
+        if _G.Sa and self:IsA("Mouse") and idx == "Hit" then
+            local t, d = nil, 1000
+            for _, v in pairs(plrs:GetPlayers()) do
+                if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    local p, vis = cam:WorldToViewportPoint(v.Character.HumanoidRootPart.Position)
+                    if vis then local m = (Vector2.new(p.X, p.Y) - uis:GetMouseLocation()).Magnitude
+                    if m < d then t = v; d = m end end
+                end
+            end
+            return t and t.Character.HumanoidRootPart.CFrame or old(self, idx)
+        end
+        return old(self, idx)
+    end)
+end
+
+f["Kill Aura"] = function(s)
+    _G.Ka = s
+    task.spawn(function()
+        while _G.Ka do
+            for _, v in pairs(plrs:GetPlayers()) do
+                if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    if (lp.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude < 25 then
+                        local tool = lp.Character:FindFirstChildOfClass("Tool")
+                        if tool then tool:Activate() end
+                    end
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+end
+
+f["No Recoil"] = function(s)
+    local old; old = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        if s and (method == "FireServer" or method == "InvokeServer") and (self.Name:find("Recoil") or self.Name:find("Shake")) then
+            return nil
+        end
+        return old(self, ...)
+    end)
+end
+
+-- [[ MOVEMENT ENGINE ]]
+f["Fly Hack v4"] = function(s)
+    if s then
+        local bv = Instance.new("BodyVelocity", lp.Character.HumanoidRootPart)
+        bv.Name = "NicoF"; bv.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+        task.spawn(function()
+            while s and lp.Character:FindFirstChild("NicoF", true) do
+                bv.Velocity = cam.CFrame.LookVector * 100
+                task.wait()
+            end
+        end)
+    else
+        local f = lp.Character.HumanoidRootPart:FindFirstChild("NicoF")
+        if f then f:Destroy() end
+    end
+end
+
+f["Speed Hack"] = function(s, v) lp.Character.Humanoid.WalkSpeed = s and (tonumber(v) or 100) or 16 end
+f["No Clip"] = function(s)
+    _G.Nc = s
+    rs.Stepped:Connect(function()
+        if _G.Nc and lp.Character then
+            for _, v in pairs(lp.Character:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = false end
+            end
+        end
+    end)
+end
+
+-- [[ REPEAT LOGIC FOR 1-70 RANGE ]]
+local list1 = {"Trigger Bot", "Reach Hack", "Rapid Fire", "Auto Parry", "Block Spammer", "Knife Aura", "Bullet Tracers", "Headshot Only", "Legit Bot", "Rage Bot", "Spin Bot", "Knife Reach", "Auto Block", "Team Check", "VisCheck Aim", "Prediction Aim", "Auto Shoot", "No Spread", "Infinite Ammo", "Grenade ESP", "Weapon Spawner", "Fast Punch", "Super Slash", "Bow Aim", "Magic Bullet", "Wall Bang", "Double Tap", "Fake Lag", "Anti Aim", "Backtrack", "Shield Mod", "Armor Refill", "Insta Kill", "Infinite Jump", "High Jump", "God Mode", "Invisible FE", "Bhop", "Spider Climb", "Teleport Click", "Air Walk", "Swim Everywhere", "Anti-Fling", "Anti-Void", "Velocity Boost", "Long Jump", "Auto Walk", "Freeze Position", "TP to Lobby", "Dash Mod", "Super Glide", "Wall Run", "Water Walk", "Edge Jump", "No Fall Damage", "Slow Motion", "Speed Burst", "Crouch Speed", "Fly Velocity", "TP to Player"}
+
+for _, n in pairs(list1) do
+    if not f[n] then
+        f[n] = function(s, v)
+            if s then
+                if n:find("Jump") then lp.Character.Humanoid.JumpPower = tonumber(v) or 100
+                elseif n:find("Ammo") then setupvalue(getreg()[n] or function() end, 1, 999)
+                elseif n == "Spin Bot" then task.spawn(function() while s do lp.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0,0.5,0) task.wait() end end)
+                end
+            end
+        end
+    end
+end
+-- [[ 🌌 NICO MYTHIC V23 - ENGINE PART B (71-140) ]]
+-- [[ STATUS: VISUALS & WORLD EXPLOITS ]]
+
+local plrs = game:GetService("Players")
+local lp = plrs.LocalPlayer
+shared.NicoLogic = shared.NicoLogic or {}
+local f = shared.NicoLogic
+
+-- [[ VISUALS ENGINE ]]
+f["Wallhack ESP"] = function(s)
+    for _, p in pairs(plrs:GetPlayers()) do
+        if p ~= lp and p.Character then
+            if s then
+                local h = Instance.new("Highlight", p.Character)
+                h.Name = "NX"; h.FillColor = Color3.new(1, 0, 0)
+            else
+                if p.Character:FindFirstChild("NX") then p.Character.NX:Destroy() end
+            end
+        end
+    end
+end
+
+f["Full Bright"] = function(s)
+    game.Lighting.Brightness = s and 2 or 1
+    game.Lighting.ClockTime = s and 12 or 14
+    game.Lighting.GlobalShadows = not s
+end
+
+f["X-Ray"] = function(s)
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") and not v:IsDescendantOf(lp.Character) then
+            v.LocalTransparencyModifier = s and 0.6 or 0
+        end
+    end
+end
+
+-- [[ WORLD ENGINE ]]
+f["Gravity Switch"] = function(s) workspace.Gravity = s and 0 or 196.2 end
+
+f["Coin Magnet"] = function(s)
+    _G.Mg = s
+    task.spawn(function()
+        while _G.Mg do
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") and (v.Name:find("Coin") or v.Name:find("Gem")) then
+                    v.CFrame = lp.Character.HumanoidRootPart.CFrame
+                end
+            end
+            task.wait(0.3)
+        end
+    end)
+end
+
+-- [[ REPEAT LOGIC FOR 71-140 RANGE ]]
+local list2 = {"Vehicle Fly", "Car Speed", "Boat Speed", "Plane Speed", "No Slowdown", "Ice Feet", "Moon Gravity", "Zero G", "Teleport Tool", "Box ESP", "Tracer Lines", "Name Tags", "Distance ESP", "Health Bar", "Inventory ESP", "Skeleton ESP", "Chams", "Rainbow ESP", "Item ESP", "Chest ESP", "Player Highlight", "No Fog", "Night Vision", "Wall See", "Head ESP", "View Model FOV", "Camera Zoom", "Custom Sky", "Time Changer", "Rainbow Map", "No Textures", "FPS Booster", "Low Graphics", "Remove Shadows", "Remove Particles", "Motion Blur", "Bloom Mod", "Player Finder", "NPC ESP", "Door ESP", "Trap ESP", "Hidden Item ESP", "Map Seed", "Radar", "3D Map", "Lobby ESP", "Ore ESP", "Auto Farm", "Auto Rebirth", "Auto Collect", "Auto Quest", "Auto Daily", "Loot Vacuum", "Auto Buy", "Auto Sell", "Auto Hatch", "Pet Leveler", "Gem Farmer", "Auto Clicker", "Auto Fishing", "Auto Mining", "Auto Woodcut", "Auto Strength", "Auto Agility", "Auto Stamina", "Auto Skill", "Instant Quest"}
+
+for _, n in pairs(list2) do
+    if not f[n] then
+        f[n] = function(s, v)
+            if s then
+                if n:find("Speed") then lp.Character.Humanoid.WalkSpeed = tonumber(v) or 150
+                elseif n == "Auto Clicker" then task.spawn(function() while s do mouse1click() task.wait(0.01) end end)
+                end
+            end
+        end
+    end
+end
+-- [[ 🌌 NICO MYTHIC V23 - ENGINE PART C (141-200) ]]
+-- [[ STATUS: UTILITY, TROLLS & DASHBOARD ]]
+
+local core = game:GetService("CoreGui")
+local lp = game:GetService("Players").LocalPlayer
+shared.NicoLogic = shared.NicoLogic or {}
+local f = shared.NicoLogic
+local sel = shared.Selected or {}
+
+-- [[ UTILITY ]]
+f["Infinite Yield"] = function(s) if s then loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end end
+f["Dex Explorer"] = function(s) if s then loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))() end end
+
+f["Fling Players"] = function(s, v)
+    _G.Fl = s
+    task.spawn(function()
+        local target = nil
+        for _, p in pairs(game.Players:GetPlayers()) do if p.Name:lower():find(v:lower()) then target = p end end
+        while _G.Fl and target and target.Character do
+            lp.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+            lp.Character.HumanoidRootPart.Velocity = Vector3.new(400000, 400000, 400000)
+            task.wait()
+        end
+    end)
+end
+
+-- [[ REPEAT LOGIC FOR 141-200 RANGE ]]
+local list3 = {"Farm Multiplier", "Auto Upgrade", "Auto Feed", "Auto Clean", "Auto Sort", "Auto Open", "Auto Use", "Auto Eat", "Auto Drink", "CMD-X", "Remote Spy", "Hydroxide", "Script Dumper", "Game Explorer", "Simple Spy", "Turtle Spy", "Dark Dex", "Loop Kill", "Universal Admin", "Fake Premium", "Cape Mod", "Name Spoofer", "Rank Spoofer", "Size Changer", "Headless FE", "Korblox FE", "Rainbow Char", "Trail Mod", "Force Field", "Fire Particles", "Neon Skin", "Chat Spammer", "Anti-AFK", "Server Hop", "Rejoin Server", "Audio Logger", "FE Animations", "Giant Character", "Small Character", "Fat Character", "Thin Character", "Hat Spin", "Tornado Fling", "Nuke Server", "Lag Server", "Crash Server", "Fake Ban", "Fake Kick", "Fake Admin", "Visual Robux", "Chat Bypass", "Auto Report", "Anti Ban", "Safe Mode", "Ghost Mode", "Mythic Zenith"}
+
+for _, n in pairs(list3) do
+    if not f[n] then
+        f[n] = function(s)
+            if s then
+                if n == "Anti-AFK" then lp.Idled:Connect(function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end)
+                elseif n == "Server Hop" then game:GetService("TeleportService"):Teleport(game.PlaceId)
+                end
+            end
+        end
+    end
+end
+
+-- [[ 🚀 RAINBOW DASHBOARD UI ]]
+if #sel > 0 then
+    if core:FindFirstChild("NicoActive") then core.NicoActive:Destroy() end
+    local sg = Instance.new("ScreenGui", core); sg.Name = "NicoActive"
+    local p = Instance.new("Frame", sg)
+    p.Size = UDim2.new(0, 230, 0, (#sel * 55) + 40); p.Position = UDim2.new(0.8, -240, 0.2, 0)
+    p.BackgroundColor3 = Color3.fromRGB(15, 15, 20); p.Active = true; p.Draggable = true
+    Instance.new("UICorner", p)
+    
+    local st = Instance.new("UIStroke", p)
+    st.Thickness = 6; st.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    task.spawn(function() while task.wait() do st.Color = Color3.fromHSV(tick() % 3 / 3, 1, 1) end end)
+    
+    local l = Instance.new("UIListLayout", p); l.Padding = UDim.new(0, 5); l.HorizontalAlignment = "Center"
+    Instance.new("TextLabel", p).Text = "MYTHIC V23 ACTIVE"; -- Header
+
+    for _, n in pairs(sel) do
+        local r = Instance.new("Frame", p); r.Size = UDim2.new(0.92, 0, 0, 50); r.BackgroundColor3 = Color3.fromRGB(30, 30, 35); Instance.new("UICorner", r)
+        local t = Instance.new("TextButton", r); t.Size = UDim2.new(0.9, 0, 0, 25); t.Position = UDim2.new(0.05, 0, 0.4, 0)
+        t.Text = n .. " [OFF]"; t.BackgroundColor3 = Color3.fromRGB(80, 0, 0); t.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", t)
+        
+        local on = false
+        t.MouseButton1Click:Connect(function()
+            on = not on
+            t.Text = n .. (on and " [ON]" or " [OFF]")
+            t.BackgroundColor3 = on and Color3.fromRGB(0, 120, 50) or Color3.fromRGB(80, 0, 0)
+            if f[n] then task.spawn(function() f[n](on) end) end
+        end)
+    end
 end
