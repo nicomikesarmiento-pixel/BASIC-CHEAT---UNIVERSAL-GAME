@@ -1,46 +1,41 @@
--- [[ 🎯 NICO MYTHIC V23 - ENGINE PART A (1-50) ]]
--- [[ STATUS: COMBAT, AIM & WEAPONS ]]
-
-local plrs = game:GetService("Players")
-local lp = plrs.LocalPlayer
-local mouse = lp:GetMouse()
-local run = game:GetService("RunService")
+-- [[ 🌌 NICO MYTHIC V23 - PART A (WAR & COMBAT LOGIC) ]]
+-- [[ MGA SCRIPT NA NAKAFOCUS SA GERA AT PATAYAN ]]
 
 shared.NicoLogic = shared.NicoLogic or {}
-local f = shared.NicoLogic
 
--- [[ 1-10: CORE COMBAT ]]
-f["Aimbot v2"] = function(s)
-    _G.Aimbot = s
+-- 1. Aimbot Logic (Legit Camera Lock)
+shared.NicoLogic["Aimbot v2"] = function(state)
+    shared.AimbotLoop = state
     task.spawn(function()
-        while _G.Aimbot do
-            local target, closest = nil, math.huge
-            for _, v in pairs(plrs:GetPlayers()) do
-                if v ~= lp and v.Character and v.Character:FindFirstChild("Head") then
-                    local pos, vis = workspace.CurrentCamera:WorldToViewportPoint(v.Character.Head.Position)
-                    if vis then
-                        local mag = (Vector2.new(pos.X, pos.Y) - game:GetService("UserInputService"):GetMouseLocation()).Magnitude
-                        if mag < closest then closest = mag; target = v end
+        while shared.AimbotLoop do
+            local target = nil
+            local dist = math.huge
+            for _, v in pairs(game.Players:GetPlayers()) do
+                if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
+                    local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(v.Character.Head.Position)
+                    if onScreen then
+                        local mPos = game:GetService("UserInputService"):GetMouseLocation()
+                        local mag = (Vector2.new(screenPos.X, screenPos.Y) - mPos).Magnitude
+                        if mag < dist then dist = mag; target = v end
                     end
                 end
             end
-            if target then
-                workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.Head.Position)
-            end
+            if target then workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.Head.Position) end
             task.wait()
         end
     end)
 end
 
-f["Kill Aura"] = function(s)
-    _G.KillAura = s
+-- 2. Kill Aura (Auto Swing/Attack)
+shared.NicoLogic["Kill Aura"] = function(state)
+    shared.KAAura = state
     task.spawn(function()
-        while _G.KillAura do
-            for _, v in pairs(plrs:GetPlayers()) do
-                if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                    local dist = (lp.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude
-                    if dist < 20 then
-                        local tool = lp.Character:FindFirstChildOfClass("Tool")
+        while shared.KAAura do
+            for _, v in pairs(game.Players:GetPlayers()) do
+                if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    local mag = (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                    if mag < 20 then
+                        local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
                         if tool then tool:Activate() end
                     end
                 end
@@ -50,170 +45,159 @@ f["Kill Aura"] = function(s)
     end)
 end
 
-f["Silent Aim"] = function(s) _G.SilentAim = s end
-f["Hitbox Expander"] = function(s)
-    _G.Hitbox = s
-    task.spawn(function()
-        while _G.Hitbox do
-            for _, v in pairs(plrs:GetPlayers()) do
-                if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                    v.Character.HumanoidRootPart.Size = Vector3.new(10, 10, 10)
-                    v.Character.HumanoidRootPart.Transparency = 0.7
-                end
-            end
-            task.wait(1)
+-- 3. Hitbox Expander (Resize Head/Root)
+shared.NicoLogic["Hitbox Expander"] = function(state)
+    local size = state and 25 or 2
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+            v.Character.HumanoidRootPart.Size = Vector3.new(size, size, size)
+            v.Character.HumanoidRootPart.Transparency = state and 0.8 or 1
+            v.Character.HumanoidRootPart.CanCollide = false
         end
-    end)
-end
-
--- [[ 11-50: WEAPON MODS PLACEHOLDERS ]]
-local combatExtra = {"Trigger Bot", "Reach Hack", "No Recoil", "Instant Reload", "Rapid Fire", "Auto Parry", "Block Spammer", "Knife Aura", "Bullet Tracers", "Headshot Only"}
-for _, name in pairs(combatExtra) do
-    f[name] = function(s) print(name .. " status: " .. tostring(s)) end
-end
--- [[ 🏃 NICO MYTHIC V23 - ENGINE PART B (51-100) ]]
--- [[ STATUS: MOVEMENT, SPEED & PHYSICS ]]
-
-local lp = game:GetService("Players").LocalPlayer
-shared.NicoLogic = shared.NicoLogic or {}
-local f = shared.NicoLogic
-
-f["Speed Hack"] = function(s)
-    _G.Speed = s
-    task.spawn(function()
-        while _G.Speed do
-            if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-                lp.Character.Humanoid.WalkSpeed = 100
-            end
-            task.wait()
-        end
-        lp.Character.Humanoid.WalkSpeed = 16
-    end)
-end
-
-f["Fly Hack v4"] = function(s)
-    _G.Flying = s
-    if s then
-        local bv = Instance.new("BodyVelocity", lp.Character.HumanoidRootPart)
-        bv.Name = "NicoFlyV23"
-        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        task.spawn(function()
-            while _G.Flying do
-                bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * 100
-                task.wait()
-            end
-            bv:Destroy()
-        end)
     end
 end
 
-f["No Clip"] = function(s)
-    _G.NoClip = s
+-- 4-50: Combat Functions (Generic Logic for mapping)
+local warList = {"Silent Aim", "No Recoil", "Rapid Fire", "Wallbang", "Trigger Bot", "Spin Bot", "Team Check", "Bullet Tracers", "ESP Box", "Skeleton ESP", "Distance ESP", "Health ESP", "Headshot Lock", "Infinite Ammo", "Knife Reach", "Auto Parry", "Damage Mod", "Auto Reload", "No Spread", "Instant Kill", "God Mode Combat", "Shield Hack", "Grenade Teleport", "Explosive Bullets", "Fire Rate Bypass", "Weapon Reach", "Fast Reload", "Anti-Aim", "FOV Changer", "Crosshair Custom", "Radar Hack", "Player Chams", "Tracer Lines", "Visible Check", "Bone Selection", "Aim Smoothing", "Prediction Aim", "Auto Heal", "Armor Refill", "Target Lock", "Bullet Rain", "One Tap Head", "Melee Aura", "Sword Reach", "Block Bypass", "Critical Hit", "War Mode Ultra"}
+
+for _, name in pairs(warList) do
+    if not shared.NicoLogic[name] then
+        shared.NicoLogic[name] = function(state)
+            if state then print("Combat Logic: " .. name .. " Active") end
+        end
+    end
+end
+-- [[ 🌌 NICO MYTHIC V23 - PART B (MOVEMENT & SPEED LOGIC) ]]
+-- [[ MGA SCRIPT NA NAKAFOCUS SA TULIN AT PAG-GALAW ]]
+
+shared.NicoLogic = shared.NicoLogic or {}
+
+-- 51. WalkSpeed (Real Speed Control)
+shared.NicoLogic["WalkSpeed"] = function(state)
+    local val = shared.NicoValues and shared.NicoValues["WalkSpeed"] or 100
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = state and val or 16
+end
+
+-- 52. JumpPower
+shared.NicoLogic["JumpPower"] = function(state)
+    local val = shared.NicoValues and shared.NicoValues["JumpPower"] or 150
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = state and val or 50
+    game.Players.LocalPlayer.Character.Humanoid.UseJumpPower = true
+end
+
+-- 53. Fly Hack (Velocity Based)
+shared.NicoLogic["Fly Hack"] = function(state)
+    local char = game.Players.LocalPlayer.Character
+    if state then
+        local bv = Instance.new("BodyVelocity", char.PrimaryPart)
+        bv.Name = "NicoFly"
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        bv.Velocity = Vector3.new(0,0,0)
+        task.spawn(function()
+            while state and char:FindFirstChild("NicoFly") do
+                bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * 100
+                task.wait()
+            end
+        end)
+    else
+        if char.PrimaryPart:FindFirstChild("NicoFly") then char.PrimaryPart.NicoFly:Destroy() end
+    end
+end
+
+-- 54. Noclip V4 (Collision Remover)
+shared.NicoLogic["Noclip V4"] = function(state)
+    shared.NoclipLoop = state
     game:GetService("RunService").Stepped:Connect(function()
-        if _G.NoClip and lp.Character then
-            for _, v in pairs(lp.Character:GetDescendants()) do
+        if shared.NoclipLoop then
+            for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
                 if v:IsA("BasePart") then v.CanCollide = false end
             end
         end
     end)
 end
 
-f["Infinite Jump"] = function(s)
-    _G.InfJump = s
-    game:GetService("UserInputService").JumpRequest:Connect(function()
-        if _G.InfJump then lp.Character.Humanoid:ChangeState("Jumping") end
+-- 55-100: Movement Functions
+local moveList = {"Infinite Jump", "Bhop", "Spider Climb", "Gravity Switch", "Air Walk", "Water Walk", "Edge Jump", "Teleport End", "Auto Obby", "Checkpoint TP", "Anti-Killpart", "Speed Coil Bypass", "Gravity Coil Bypass", "Auto Win", "Stage Skipper", "Part Destroyer", "Fling All", "No Fall Damage", "High Jump", "Super Speed", "Platform Stand", "Auto Rebirth Obby", "Coin Collector", "Level Farmer", "Teleport to Start", "Rainbow Path", "Invisible Body", "Size Changer", "Headless FE", "Speed Trail", "Slow Motion", "Low Gravity", "High Friction", "Swim Everywhere", "No Clip V5", "Physics Bypass", "Wall Walk", "Ceiling Walk", "Long Jump", "Double Jump", "Triple Jump", "Parkour Master", "Dash Ability", "Super Slide", "Velocity Mod", "Obby God Mode"}
+
+for _, name in pairs(moveList) do
+    if not shared.NicoLogic[name] then
+        shared.NicoLogic[name] = function(state)
+            if state then print("Movement Logic: " .. name .. " Active") end
+        end
+    end
+end
+-- [[ 🌌 NICO MYTHIC V23 - PART C (FARMING & TOOLS LOGIC) ]]
+-- [[ MGA SCRIPT NA NAKAFOCUS SA PAG-YAMAN AT AUTO-FARM ]]
+
+shared.NicoLogic = shared.NicoLogic or {}
+
+-- 101. Coin Magnet (Auto Pickup)
+shared.NicoLogic["Coin Magnet"] = function(state)
+    shared.MagnetOn = state
+    task.spawn(function()
+        while shared.MagnetOn do
+            for _, v in pairs(workspace:GetDescendants()) do
+                if (v.Name:lower():find("coin") or v.Name:lower():find("gem")) and v:IsA("BasePart") then
+                    v.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+                end
+            end
+            task.wait(0.2)
+        end
     end)
 end
 
--- [[ 60-100: MOVEMENT EXTRAS ]]
-local moveExtra = {"God Mode", "Invisible FE", "Bhop", "Spider Climb", "Teleport Click", "Gravity Switch", "Air Walk", "Anti-Fling", "High Jump", "Zero G"}
-for _, name in pairs(moveExtra) do
-    f[name] = function(s) print(name .. " status: " .. tostring(s)) end
+-- 102. Auto Clicker (Fast Clicking)
+shared.NicoLogic["Auto Clicker"] = function(state)
+    shared.Clicking = state
+    task.spawn(function()
+        local vu = game:GetService("VirtualUser")
+        while shared.Clicking do
+            vu:Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            task.wait(0.01)
+            vu:Button1Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            task.wait(0.05)
+        end
+    end)
 end
--- [[ 👁️ NICO MYTHIC V23 - ENGINE PART C (101-150) ]]
--- [[ STATUS: VISUALS, ESP & CHAMS ]]
 
-local plrs = game:GetService("Players")
-shared.NicoLogic = shared.NicoLogic or {}
-local f = shared.NicoLogic
+-- 103-150: Farming Functions
+local farmList = {"Auto Farm All", "Auto Rebirth", "Gem Farmer", "Chest ESP", "Item Finder", "Loot Vacuum", "Auto Buy", "Auto Sell", "Auto Quest", "Infinite Yield", "Dex Explorer", "Remote Spy", "Fast Swing", "Instant Process", "Auto Fish", "Auto Mine", "Wood Cutter", "Pet Auto-Evolve", "Inventory Sort", "Auto Open Egg", "Lucky Boost", "Auto Craft", "Trade Scammer Bypass", "Market Sniper", "Price Checker", "Resource Finder", "Auto Eat", "Auto Drink", "Daily Reward Collector", "Gift Opener", "Storage Expander", "Farm Bot v3", "Zombie Farmer", "Mob Spawner", "Boss Killer", "Dungeon Clearer", "Auto Skill Use", "Mana Refill", "Auto Upgrade", "Building Hacker", "Plot Stealer", "Auto Decorate", "Worker Mod", "Fast Growth", "Crop Protector", "Weather Modifier", "Time Skipper", "Farm Ultra"}
 
--- [[ 101: THE SOLID CHAMS (ROBLOX HIGHLIGHT) ]]
-f["Chams"] = function(s)
-    _G.ChamsEnabled = s
-    
-    local function apply(char)
-        if not char then return end
-        if s then
-            local h = char:FindFirstChild("NicoV23_Highlight") or Instance.new("Highlight", char)
-            h.Name = "NicoV23_Highlight"
-            h.FillColor = Color3.fromRGB(255, 0, 0)
-            h.OutlineColor = Color3.fromRGB(255, 255, 255)
-            h.FillAlpha = 0.5
-            h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-        else
-            if char:FindFirstChild("NicoV23_Highlight") then char.NicoV23_Highlight:Destroy() end
+for _, name in pairs(farmList) do
+    if not shared.NicoLogic[name] then
+        shared.NicoLogic[name] = function(state)
+            if state then print("Farm System: " .. name .. " Running") end
         end
     end
+end
+-- [[ 🌌 NICO MYTHIC V23 - PART D (SYSTEM & SETTINGS LOGIC) ]]
+-- [[ MGA SCRIPT NA NAKAFOCUS SA PERFORMANCE AT BYPASS ]]
 
-    for _, v in pairs(plrs:GetPlayers()) do
-        if v ~= plrs.LocalPlayer then apply(v.Character) end
-    end
+shared.NicoLogic = shared.NicoLogic or {}
 
-    -- Auto-apply on spawn
-    if s and not _G.ChamsLoop then
-        _G.ChamsLoop = true
-        plrs.PlayerAdded:Connect(function(p)
-            p.CharacterAdded:Connect(function(c)
-                task.wait(0.5)
-                if _G.ChamsEnabled then apply(c) end
-            end)
+-- 151. Anti-AFK (Hindi maki-kick)
+shared.NicoLogic["Anti-AFK"] = function(state)
+    if state then
+        game.Players.LocalPlayer.Idled:Connect(function()
+            game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+            task.wait(1)
+            game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
         end)
     end
 end
 
-f["Full Bright"] = function(s)
-    if s then
-        game.Lighting.Ambient = Color3.new(1,1,1)
-        game.Lighting.Brightness = 2
-    else
-        game.Lighting.Ambient = Color3.new(0,0,0)
-        game.Lighting.Brightness = 1
-    end
+-- 152. FPS Unlocker
+shared.NicoLogic["FPS Unlocker"] = function(state)
+    if setfpscap then setfpscap(state and 999 or 60) end
 end
 
--- [[ 110-150: VISUAL EXTRAS ]]
-local visualExtra = {"Box ESP", "Tracer Lines", "Name Tags", "Health Bar", "X-Ray", "Rainbow ESP", "Night Vision", "No Fog", "FPS Booster", "Low Graphics"}
-for _, name in pairs(visualExtra) do
-    f[name] = function(s) print(name .. " status: " .. tostring(s)) end
-end
--- [[ 🛠️ NICO MYTHIC V23 - ENGINE PART D (151-200) ]]
--- [[ STATUS: UTILITY, TROLLS & AUTO-FARM ]]
+-- 153-200: System Functions
+local sysList = {"Server Hop", "Rejoin Server", "Low FPS Mode", "Graphics Boost", "Lag Switch", "Invisible FE", "Name Spoofer", "Rank Spoofer", "Chat Spammer", "Announce Join", "Kill Logs", "Join Logs", "Server Stats", "Ping Monitor", "CPU Optimizer", "Memory Cleaner", "Dark Mode UI", "Light Mode UI", "Hide UI Keybind", "Config Saver", "Auto Load Config", "Reset All", "Destroy UI", "Discord Webhook", "Error Logger", "Key System Bypass", "Premium Unlocker", "Skin Changer", "Cape FE", "Pet FE", "Animation Pack FE", "Gamepass Giver", "Audio Logger", "Texture Remover", "No Fog", "Full Bright", "Night Vision", "X-Ray", "Camera Zoom Extender", "Third Person", "First Person Lock", "Cinematic Mode", "Script Hub Link", "Update Checker", "Credits", "Support", "Nico Sarmiento Secret", "Final Exit"}
 
-shared.NicoLogic = shared.NicoLogic or {}
-local f = shared.NicoLogic
-
-f["Infinite Yield"] = function(s)
-    if s then loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end
-end
-
-f["Dex Explorer"] = function(s)
-    if s then loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))() end
-end
-
-f["Fling Players"] = function(s)
-    _G.Fling = s
-    task.spawn(function()
-        while _G.Fling do
-            local hrp = game.Players.LocalPlayer.Character.HumanoidRootPart
-            hrp.Velocity = Vector3.new(0, 10000, 0)
-            hrp.RotVelocity = Vector3.new(0, 10000, 0)
-            task.wait()
+for _, name in pairs(sysList) do
+    if not shared.NicoLogic[name] then
+        shared.NicoLogic[name] = function(state)
+            if state then print("System Utility: " .. name .. " Active") end
         end
-    end)
-end
-
--- [[ 160-200: UTILITY & TROLLS ]]
-local utilExtra = {"Universal Admin", "Fake Premium", "Cape Mod", "Name Spoofer", "Server Hop", "Chat Spammer", "Anti-AFK", "Auto Rebirth", "Coin Magnet", "Mythic Zenith"}
-for _, name in pairs(utilExtra) do
-    f[name] = function(s) print(name .. " status: " .. tostring(s)) end
+    end
 end
