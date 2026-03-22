@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ROBLOX GENERATOR SCRIPT BY NICO | FULL ENGINE</title>
+    <style>
+        :root { --neon: #00ff41; --blue: #00d9ff; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; font-weight: 800; }
+        body { margin: 0; background: #000; color: #fff; overflow: hidden; height: 100vh; }
+        canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.3; }
+
+        .container { 
+            width: 92%; max-width: 450px; margin: 15px auto; height: 92vh; 
+            background: rgba(5, 5, 5, 0.9); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 24px;
+            display: flex; flex-direction: column; padding: 20px; position: relative;
+        }
+
+        .header h1 { font-size: 22px; text-align: center; color: var(--blue); text-transform: uppercase; margin: 0; }
+        .icon-box { flex: 1; display: flex; justify-content: center; align-items: center; }
+        .roblox-mirror { 
+            width: 60px; height: 60px; background: #fff; position: relative; transform: rotate(-15deg);
+            box-shadow: 0 0 30px #fff; animation: spin 4s infinite linear;
+        }
+        .roblox-mirror::after { content: ''; position: absolute; top: 25%; left: 25%; width: 50%; height: 50%; background: #000; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        select, input { width: 100%; background: #111; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 12px; margin-bottom: 15px; outline: none; }
+        .btn { width: 100%; padding: 16px; border-radius: 14px; border: none; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 11px; }
+        .btn-outline { background: transparent; border: 1px solid var(--blue); color: var(--blue); }
+        .btn-primary { background: var(--blue); color: #000; }
+        .btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+        .modal { position: absolute; bottom: -100%; left: 0; width: 100%; height: 85%; background: #0a0a0a; border-top: 2px solid var(--blue); border-radius: 24px 24px 0 0; padding: 20px; transition: 0.5s; z-index: 100; display: flex; flex-direction: column; }
+        .modal.active { bottom: 0; }
+        .scroll-list { flex: 1; overflow-y: auto; }
+        .list-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .list-item.active { border-color: var(--blue); color: var(--blue); background: rgba(0,217,255,0.05); }
+
+        .review-card { background: rgba(255,255,255,0.02); border: 1px solid var(--blue); padding: 15px; border-radius: 15px; margin-bottom: 15px; text-align: center; }
+        #terminal { display: none; height: 100%; flex-direction: column; }
+        textarea { flex: 1; background: #000; color: var(--neon); border: 1px dashed var(--neon); border-radius: 12px; padding: 12px; font-size: 10px; outline: none; white-space: pre; resize: none; }
+    </style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<div class="container">
+    <div id="home" class="section">
+        <div class="header"><h1>Sarmiento V6</h1></div>
+        <label style="font-size:10px; color:var(--blue)">SELECT UI ENGINE:</label>
+        <select id="guiChoice">
+            <option value="Rayfield">Rayfield UI</option>
+            <option value="Orion">Orion UI</option>
+            <option value="Venyx">Venyx UI</option>
+            <option value="Fluent">Fluent UI</option>
+            <option value="NoGUI">No GUI (Raw)</option>
+        </select>
+        <div class="icon-box"><div class="roblox-mirror"></div></div>
+        <button class="btn btn-outline" onclick="openM('mP')">🛡️ PROTECTIONS (<span id="pcnt">0</span>)</button>
+        <button id="btnS" class="btn btn-outline" onclick="openM('mS')" disabled>🚀 SCRIPTS (<span id="cnt">0</span>)</button>
+        <button id="btnG" class="btn btn-primary" onclick="showReview()" disabled>REVIEW & GENERATE</button>
+    </div>
+
+    <div id="loading" style="display:none; flex-direction:column; justify-content:center; align-items:center; height:100%;">
+        <div class="roblox-mirror"></div>
+        <div id="st" style="margin-top:20px; font-size:12px;">COMPILING...</div>
+        <div style="width:80%; height:4px; background:#222; margin-top:10px; border-radius:10px; overflow:hidden;">
+            <div id="bar" style="width:0%; height:100%; background:var(--blue);"></div>
+        </div>
+    </div>
+
+    <div id="terminal" class="section" style="display:none; height:100%; flex-direction:column;">
+        <div style="font-size:11px; color:var(--blue); margin-bottom:10px;">✓ SCRIPT SUCCESSFULLY COMPILED</div>
+        <textarea id="output" readonly></textarea>
+        <button class="btn btn-primary" onclick="location.reload()">BUILD NEW PROJECT</button>
+    </div>
+
+    <div id="mP" class="modal">
+        <div class="scroll-list" id="pGrid"></div>
+        <button class="btn btn-primary" onclick="closeM('mP')">CONFIRM</button>
+    </div>
+    <div id="mS" class="modal">
+        <div class="scroll-list" id="sGrid"></div>
+        <button class="btn btn-primary" onclick="closeM('mS')">CONFIRM</button>
+    </div>
+    <div id="mR" class="modal">
+        <div class="scroll-list" id="rGrid"></div>
+        <input type="text" id="hubN" value="Sarmiento Hub V6">
+        <button class="btn btn-primary" onclick="startGen()">GENERATE LUA</button>
+        <button class="btn" style="color:red" onclick="closeM('mR')">BACK</button>
+    </div>
+</div>
+<script>
+    const pData = [
+        {n: "🛡️ Anti-Kick (Metatable)", l: "local mt=getrawmetatable(game); setreadonly(mt,false); local old=mt.__namecall; mt.__namecall=newcclosure(function(s,...) if getnamecallmethod()=='Kick' then return nil end return old(s,...) end) warn('Sarmiento V6: Anti-Kick Active')"},
+        {n: "🚫 Anti-Ban (Shield)", l: "game:GetService('ScriptContext').Error:Connect(function() return end); settings().Diagnostics.LuaProfilingEnabled = false; warn('Sarmiento V6: Anti-Ban Active')"},
+        {n: "⏳ Anti-AFK (Stay Online)", l: "game:GetService('Players').LocalPlayer.Idled:connect(function() game:GetService('VirtualUser'):Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame) end); warn('Sarmiento V6: Anti-AFK Active')"},
+        {n: "⚡ FPS Booster (No Lag)", l: "for _,v in pairs(game:GetDescendants()) do if v:IsA('DataModelMesh') or v:IsA('FaceInstance') then v:Destroy() end end; settings().Rendering.QualityLevel = 1; warn('Sarmiento V6: FPS Boost Active')"},
+        {n: "🌀 Server Hop (Safe)", l: "local Http = game:GetService('HttpService'); local TPS = game:GetService('TeleportService'); local Api = 'https://games.roblox.com/v1/games/'..game.PlaceId..'/servers/Public?sortOrder=Desc&limit=100'; local List = Http:JSONDecode(game:HttpGet(Api)); for _,v in pairs(List.data) do if v.playing < v.maxPlayers then TPS:TeleportToPlaceInstance(game.PlaceId, v.id) end end"},
+        {n: "🆔 HWID Spoofer (Mock)", l: "local gmeta = getrawmetatable(game); setreadonly(gmeta, false); local oldNamecall = gmeta.__namecall; gmeta.__namecall = newcclosure(function(self, ...) local method = getnamecallmethod(); if method == 'GetClientId' then return 'Sarmiento-'..math.random(1000,9999) end return oldNamecall(self, ...) end)"},
+        {n: "💬 Privacy Mode (Chat)", l: "game:GetService('StarterGui'):SetCore('ChatMakeSystemMessage', {Text = 'Sarmiento V6: Privacy Mode Enabled', Color = Color3.fromRGB(0, 217, 255)})"},
+        {n: "🕵️ Anonymous Mode", l: "local p = game.Players.LocalPlayer; p.Character.Head.NameTag:Destroy(); p.DisplayName = 'Player'; warn('Sarmiento V6: Name Hidden')"},
+        {n: "📡 Remote Logger Bypass", l: "local g = getrawmetatable(game); setreadonly(g, false); local old = g.__namecall; g.__namecall = newcclosure(function(self, ...) if getnamecallmethod() == 'FireServer' then return nil end return old(self, ...) end); warn('Sarmiento V6: Remotes Blocked')"},
+        {n: "🚫 Anti-Admins (Auto-Leave)", l: "game.Players.PlayerAdded:Connect(function(plr) if plr:GetRankInGroup(game.CreatorId) > 100 then game.Players.LocalPlayer:Kick('Admin Detected!') end end); warn('Sarmiento V6: Admin Watch Active')"},
+        {n: "📵 Anti-Chat Logger", l: "local old; old = hookmetamethod(game, '__namecall', function(self, ...) if getnamecallmethod() == 'FireServer' and tostring(self) == 'SayMessageRequest' then return nil end return old(self, ...) end); warn('Sarmiento V6: Chat Logger Blocked')"},
+        {n: "🛡️ Anti-Teleport Detect", l: "local g = getrawmetatable(game); setreadonly(g, false); local old = g.__index; g.__index = newcclosure(function(self, k) if k == 'CFrame' and self:IsA('HumanoidRootPart') then return old(self, k) end return old(self, k) end); warn('Sarmiento V6: TP Detection Bypassed')"},
+        {n: "🚫 Disable Touch Reports", l: "for i,v in pairs(game:GetDescendants()) do if v:IsA('TouchTransmitter') then v:Destroy() end end; warn('Sarmiento V6: Touch Reports Disabled')"},
+        {n: "🌑 Shadow Mode (No Trace)", l: "settings().Physics.AllowSleep = true; settings().Physics.PhysicsEnvironmentalThrottle = 1; warn('Sarmiento V6: Physics Trace Removed')"},
+        {n: "🕵️ Ghost Mode (No Torso)", l: "local p = game.Players.LocalPlayer.Character; if p:FindFirstChild('LowerTorso') then p.LowerTorso:Destroy() end; warn('Sarmiento V6: Invisible to some Anti-Cheats')"}
+    ];
+const sLibrary = [
+    {n: "🚀 Fly V3", l: "local plr = game.Players.LocalPlayer; local bv = Instance.new('BodyVelocity', plr.Character.HumanoidRootPart); bv.MaxForce = Vector3.new(9e9,9e9,9e9); bv.Velocity = Vector3.new(0,50,0)"},
+    {n: "⚡ Extreme Speed", l: "game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 150"},
+    {n: "🚀 Super Jump", l: "game.Players.LocalPlayer.Character.Humanoid.JumpPower = 300; game.Players.LocalPlayer.Character.Humanoid.UseJumpPower = true"},
+    {n: "👻 Noclip Mode", l: "game:GetService('RunService').Stepped:Connect(function() for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do if v:IsA('BasePart') then v.CanCollide = false end end end)"},
+    {n: "👁️ ESP Box", l: "for i,v in pairs(game.Players:GetPlayers()) do if v ~= game.Players.LocalPlayer then local h = Instance.new('Highlight', v.Character); h.FillTransparency = 0.5; end end"},
+    {n: "🌌 Infinite Jump", l: "game:GetService('UserInputService').JumpRequest:Connect(function() game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState('Jumping') end)"},
+    {n: "🌊 Swim in Air", l: "game.Players.LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, true); game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)"},
+    {n: "🔴 Zero No Hold", l: "local p = game.Players.LocalPlayer; local m = p:GetMouse(); m.Button1Down:Connect(function() p.Character.HumanoidRootPart.CFrame = m.Hit end)"},
+    {n: "⚔️ Kill Aura (60s)", l: "spawn(function() while wait() do for i,v in pairs(game.Players:GetPlayers()) do if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild('HumanoidRootPart') then if (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 60 then print('Locked: '..v.Name) end end end end end)"},
+    {n: "🎯 Silent Aim", l: "local g = getrawmetatable(game); setreadonly(g, false); local old = g.__namecall; g.__namecall = newcclosure(function(self, ...) if getnamecallmethod() == 'FindPartOnRayWithIgnoreList' then return workspace.CurrentCamera:WorldToViewportPoint(game.Players:GetPlayers()[2].Character.Head.Position) end return old(self, ...) end)"},
+    {n: "🏃 Speed Toggle", l: "_G.Speed = 200; game:GetService('RunService').Stepped:Connect(function() game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = _G.Speed end)"},
+    {n: "💎 Auto-Collect", l: "for i,v in pairs(workspace:GetDescendants()) do if v:IsA('TouchTransmitter') then firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0); wait(); firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1); end end"},
+    {n: "👻 Semi-Invisible", l: "for i,v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do if v:IsA('BasePart') and v.Name ~= 'HumanoidRootPart' then v.Transparency = 0.5 end end"},
+    {n: "🔓 Unlock Items", l: "for i,v in pairs(game:GetService('ReplicatedStorage'):GetDescendants()) do if v:IsA('RemoteEvent') and v.Name:find('Unlock') then v:FireServer() end end"},
+    {n: "🌀 Inf Jump Fly", l: "local UIS = game:GetService('UserInputService'); UIS.JumpRequest:Connect(function() game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState('Jumping') end)"},
+    {n: "🏹 Hitbox 20x", l: "_G.HeadSize = 20; game:GetService('RunService').RenderStepped:Connect(function() for _,v in pairs(game:GetService('Players'):GetPlayers()) do if v.Name ~= game.Players.LocalPlayer.Name then pcall(function() v.Character.HumanoidRootPart.Size = Vector3.new(20,20,20); v.Character.HumanoidRootPart.Transparency = 0.7; v.Character.HumanoidRootPart.CanCollide = false end) end end end)"},
+    {n: "🛡️ God Mode", l: "local p = game.Players.LocalPlayer; p.Character.Humanoid.MaxHealth = 9e9; p.Character.Humanoid.Health = 9e9; p.Character.Humanoid.Name = 'Invincible'"},
+    {n: "🔭 FullBright", l: "local l = game:GetService('Lighting'); l.Brightness = 2; l.ClockTime = 14; l.FogEnd = 100000; l.GlobalShadows = false"},
+    {n: "📍 Player Tracker", l: "while wait() do for _,v in pairs(game.Players:GetPlayers()) do if v ~= game.Players.LocalPlayer and v.Character and not v.Character:FindFirstChild('BillboardGui') then local b = Instance.new('BillboardGui', v.Character.Head); b.Size = UDim2.new(0,100,0,50); b.AlwaysOnTop = true; local t = Instance.new('TextLabel', b); t.Text = v.Name; t.Size = UDim2.new(1,0,1,0); t.BackgroundTransparency = 1; t.TextColor3 = Color3.new(1,0,0) end end end"},
+    {n: "⚡ TP to Mouse", l: "local p = game.Players.LocalPlayer; local m = p:GetMouse(); m.KeyDown:Connect(function(k) if k == 't' then p.Character.HumanoidRootPart.CFrame = m.Hit + Vector3.new(0,3,0) end end)"},
+    {n: "🚫 Anti-Fling", l: "game:GetService('RunService').Stepped:Connect(function() for _,v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do if v:IsA('BasePart') then v.CanCollide = false end end end)"},
+    {n: "🏹 Reach Click", l: "local p=game.Players.LocalPlayer; local m=p:GetMouse(); m.Button1Down:Connect(function() if m.Target and (m.Target.Position - p.Character.HumanoidRootPart.Position).Magnitude < 100 then print('Hit') end end)"},
+    {n: "🌪️ Spin Bot", l: "local p=game.Players.LocalPlayer; spawn(function() while wait() do p.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(50), 0) end end)"},
+    {n: "🧊 Water Walk", l: "local p=game.Players.LocalPlayer; game:GetService('RunService').Stepped:Connect(function() p.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, true); p.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Climbing) end)"},
+    {n: "🚫 No Clip V2", l: "local s=game:GetService('RunService'); local p=game.Players.LocalPlayer; s.Stepped:Connect(function() for _,v in pairs(p.Character:GetDescendants()) do if v:IsA('BasePart') then v.CanCollide = false end end end)"},
+    {n: "🛡️ Auto-Heal", l: "spawn(function() while wait(1) do if game.Players.LocalPlayer.Character.Humanoid.Health < 100 then game.Players.LocalPlayer.Character.Humanoid.Health = 100 end end end)"},
+    {n: "🛑 Freeze All", l: "for _,v in pairs(game.Players:GetPlayers()) do if v ~= game.Players.LocalPlayer then v.Character.HumanoidRootPart.Anchored = true end end"},
+    {n: "🔓 BTools", l: "Instance.new('HopperBin', game.Players.LocalPlayer.Backpack).BinType = 4; Instance.new('HopperBin', game.Players.LocalPlayer.Backpack).BinType = 3"},
+    {n: "🛡️ Anti-Stun", l: "local p = game.Players.LocalPlayer; game:GetService('RunService').Stepped:Connect(function() p.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false); p.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false) end)"},
+    {n: "🌀 Spin-Kill", l: "spawn(function() while wait() do game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(100), 0); for _,v in pairs(game.Players:GetPlayers()) do if v ~= game.Players.LocalPlayer and v.Character and (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 5 then v.Character.Humanoid.Health = 0 end end end end)"},
+    {n: "📍 ESP Tracer", l: "for _,v in pairs(game.Players:GetPlayers()) do if v ~= game.Players.LocalPlayer then local l = Instance.new('LineHandleAdornment', v.Character.HumanoidRootPart); l.Length = 1000; l.Thickness = 2; l.Adornee = v.Character.HumanoidRootPart; l.Color3 = Color3.new(0, 1, 255) end end"},
+    {n: "🛑 Inf Stamina", l: "game:GetService('RunService').Stepped:Connect(function() local h = game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid'); if h then h.Stamina = 100 end end)"},
+    {n: "☁️ No Gravity", l: "game.Workspace.Gravity = 0"},
+    {n: "🔥 Fire Aura", l: "Instance.new('Fire', game.Players.LocalPlayer.Character.HumanoidRootPart).Size = 20"},
+    {n: "🚀 Instant Respawn", l: "game.Players.LocalPlayer.Character.Humanoid.Died:Connect(function() wait(0.1); game.Players.LocalPlayer:LoadCharacter() end)"},
+    {n: "🔴 Zero Hold V2", l: "local p = game.Players.LocalPlayer; local m = p:GetMouse(); m.Button1Down:Connect(function() if m.Target then pcall(function() m.Target.CanCollide = false; p.Character.HumanoidRootPart.CFrame = m.Hit end) end end)"},
+    {n: "🛡️ Anti-Log", l: "local g = getrawmetatable(game); setreadonly(g, false); local old = g.__namecall; g.__namecall = newcclosure(function(self, ...) if getnamecallmethod() == 'FireServer' and tostring(self) == 'Logger' then return nil end return old(self, ...) end)"},
+    {n: "👁️ Wallhack", l: "for _,v in pairs(game.Players:GetPlayers()) do if v ~= game.Players.LocalPlayer then Instance.new('Highlight', v.Character).FillColor = Color3.fromRGB(255, 0, 0) end end"},
+    {n: "⚡ Fast Prox", l: "game:GetService('ProximityPromptService').PromptButtonHoldBegan:Connect(function(p) fireproximityprompt(p) end)"},
+    {n: "🎯 Curve Aim", l: "game:GetService('RunService').RenderStepped:Connect(function() pcall(function() local t = game.Players:GetPlayers()[2].Character.Head; workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, t.Position) end) end)"},
+    {n: "🔓 FPS Unlock", l: "setfpscap(120)"},
+    {n: "🕵️ Spoofer", l: "game.Players.LocalPlayer.DisplayName = 'Player'; game.Players.LocalPlayer.Name = 'Player'"},
+    {n: "💤 Anti-AFK", l: "local vu = game:GetService('VirtualUser'); game.Players.LocalPlayer.Idled:Connect(function() vu:CaptureController(); vu:ClickButton2(Vector2.new()) end)"},
+    {n: "🏗️ Deleter", l: "local m = game.Players.LocalPlayer:GetMouse(); m.Button1Down:Connect(function() if m.Target then m.Target:Destroy() end end)"},
+    {n: "🌌 Sky-Floor", l: "local f = Instance.new('Part', workspace); f.Size = Vector3.new(10,1,10); f.Transparency = 1; f.Anchored = true; game:GetService('RunService').RenderStepped:Connect(function() f.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,-3.5,0) end)"},
+    {n: "📉 High FPS", l: "for _,v in pairs(game:GetDescendants()) do if v:IsA('BasePart') then v.Material = 'SmoothPlastic' end if v:IsA('Decal') then v:Destroy() end end"},
+    {n: "🚀 Instant Stop", l: "game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(0,0,0)"},
+    {n: "🧗 Inf Climb", l: "game:GetService('RunService').Stepped:Connect(function() game.Players.LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, true) end)"},
+    {n: "🎭 Invisible", l: "game.Players.LocalPlayer.Character.LowerTorso.Root:Destroy(); for _,v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do if v:IsA('BasePart') then v.Transparency = 1 end end"},
+    {n: "🌊 Spider Walk", l: "game:GetService('RunService').RenderStepped:Connect(function() local r = Ray.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position, game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.LookVector * 5); if workspace:FindPartOnRay(r) then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame *= CFrame.new(0,0.5,-0.5) end end)"},
+    {n: "🏹 Sphere Reach", l: "spawn(function() while wait() do for _,v in pairs(game.Players:GetPlayers()) do if v ~= game.Players.LocalPlayer and v.Character then v.Character.HumanoidRootPart.Size = Vector3.new(10,10,10); v.Character.HumanoidRootPart.CanCollide = false end end end end)"},
+    {n: "🌬️ Push Fling", l: "game:GetService('RunService').Stepped:Connect(function() for _,v in pairs(game.Players:GetPlayers()) do if v ~= game.Players.LocalPlayer and v.Character then if (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 15 then v.Character.HumanoidRootPart.Velocity = Vector3.new(0,500,0) end end end end)"},
+    {n: "💨 Dash (Q)", l: "game.Players.LocalPlayer:GetMouse().KeyDown:Connect(function(k) if k == 'q' then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame *= CFrame.new(0,0,-15) end end)"},
+    {n: "🍄 Small Size", l: "local h = game.Players.LocalPlayer.Character.Humanoid; h.BodyDepthScale.Value = 0.5; h.BodyHeightScale.Value = 0.5; h.BodyWidthScale.Value = 0.5"},
+    {n: "🛡️ Auto-Parry", l: "spawn(function() while wait() do for _,v in pairs(workspace:GetDescendants()) do if v:IsA('TouchTransmitter') and v.Parent.Name:find('Hit') then firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0); wait(); firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1) end end end end)"},
+    {n: "🌀 Tornado", l: "local v = Instance.new('BodyAngularVelocity', game.Players.LocalPlayer.Character.HumanoidRootPart); v.AngularVelocity = Vector3.new(0,50,0); v.MaxTorque = Vector3.new(0,9e9,0)"},
+    {n: "🌑 Blackout", l: "game:GetService('Lighting'):ClearAllChildren(); Instance.new('Sky', game:GetService('Lighting'))"},
+    {n: "🔓 Max Zoom", l: "game.Players.LocalPlayer.CameraMaxZoomDistance = 10000"},
+    {n: "☀️ Day Time", l: "game:GetService('Lighting').ClockTime = 14"},
+    {n: "🌙 Night Time", l: "game:GetService('Lighting').ClockTime = 0"},
+    {n: "🛡️ Auto-Click", l: "_G.C = true; spawn(function() while _G.C do game:GetService('VirtualUser'):Button1Down(Vector2.new(0,0)); wait(0.01) end end)"},
+    {n: "🎭 Smooth Clip", l: "game:GetService('RunService').Stepped:Connect(function() for _,v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do if v:IsA('BasePart') then v.CanCollide = false end end end)"},
+    {n: "🚀 High Jump", l: "game.Players.LocalPlayer.Character.Humanoid.JumpPower = 150"},
+    {n: "🧊 Freeze Pos", l: "game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = not game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored"},
+    {n: "📍 ESP Name", l: "for _,v in pairs(game.Players:GetPlayers()) do if v ~= game.Players.LocalPlayer and v.Character then local b = Instance.new('BillboardGui', v.Character.Head); b.Size = UDim2.new(0,200,0,50); b.AlwaysOnTop = true; local t = Instance.new('TextLabel', b); t.Text = v.Name; t.TextColor3 = Color3.new(1,1,1); t.BackgroundTransparency = 1; t.Size = UDim2.new(1,0,1,0) end end"},
+    {n: "🏹 Tool Reach", l: "for _,v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do if v:IsA('Tool') then v.Handle.Size = Vector3.new(20,20,20); v.Handle.Transparency = 0.8; v.Handle.CanCollide = false end end"},
+    {n: "🏃 Speed Norm", l: "game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16"},
+    {n: "🔥 Range Check", l: "spawn(function() while wait() do for _,v in pairs(game.Players:GetPlayers()) do if v ~= game.Players.LocalPlayer and v.Character and (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 10 then print('Near: '..v.Name) end end end end)"}
+];
+let selP = [], selS = [];
+
+    function render() {
+        const pG = document.getElementById('pGrid'); pG.innerHTML = "";
+        document.getElementById('pcnt').innerText = selP.length;
+        pData.forEach((p, i) => {
+            const d = document.createElement('div'); d.className = 'list-item' + (selP.includes(i) ? ' active' : '');
+            d.innerHTML = `<span>${p.n}</span><span>${selP.includes(i)?'✓':'+'}</span>`;
+            d.onclick = () => { if(selP.includes(i)) selP=selP.filter(x=>x!==i); else selP.push(i); render(); check(); };
+            pG.appendChild(d);
+        });
+
+        const sG = document.getElementById('sGrid'); sG.innerHTML = "";
+        document.getElementById('cnt').innerText = selS.length;
+        sLibrary.forEach((s, i) => {
+            const d = document.createElement('div'); d.className = 'list-item' + (selS.includes(i) ? ' active' : '');
+            d.innerHTML = `<span>${s.n}</span><span>${selS.includes(i)?'✓':'+'}</span>`;
+            d.onclick = () => { if(selS.includes(i)) selS=selS.filter(x=>x!==i); else if(selS.length<5) selS.push(i); render(); check(); };
+            sG.appendChild(d);
+        });
+    }
+
+    function check() {
+        document.getElementById('btnS').disabled = selP.length === 0;
+        document.getElementById('btnG').disabled = selS.length === 0;
+    }
+
+    function showReview() {
+        const rG = document.getElementById('rGrid'); rG.innerHTML = "";
+        selS.forEach(idx => {
+            rG.innerHTML += `<div class="review-card">
+                <div style="color:var(--blue); margin-bottom:10px;">${sLibrary[idx].n}</div>
+                <select id="t_${idx}">
+                    <option value="Button">Button</option>
+                    <option value="Toggle">Toggle</option>
+                    <option value="Slider">Slider</option>
+                    <option value="Input">Textbox (Input)</option>
+                </select>
+            </div>`;
+        });
+        openM('mR');
+    }
+
+    function startGen() {
+        closeM('mR');
+        document.getElementById('home').style.display='none';
+        document.getElementById('loading').style.display='flex';
+        let p = 0;
+        let iv = setInterval(() => {
+            p += 1.5; document.getElementById('bar').style.width = p + "%";
+            if(p >= 100) { clearInterval(iv); build(); }
+        }, 100);
+    }
+
+    function build() {
+        const name = document.getElementById('hubN').value;
+        const gui = document.getElementById('guiChoice').value;
+        let code = `-- [[ SARMIENTO V6 PRO ]]\n-- [[ HUB NAME: ${name} ]]\n\n`;
+
+        selP.forEach(i => code += pData[i].l + "\n");
+        code += "warn('Sarmiento V6: Protections Loaded!')\n\n";
+
+        if(gui === "NoGUI") {
+            selS.forEach(i => code += `-- Feature: ${sLibrary[i].n}\n${sLibrary[i].l}\n\n`);
+        } else {
+            code += `local Lib = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()\n`;
+            code += `local Win = Lib:CreateWindow({Name = "${name}", LoadingTitle = "Sarmiento Hub", ConfigurationSaving = {Enabled = false}})\n`;
+            code += `local Tab = Win:CreateTab("Main Hacks")\n\n`;
+            
+            selS.forEach(idx => {
+                const type = document.getElementById(`t_${idx}`).value;
+                const sName = sLibrary[idx].n;
+                const sLogic = sLibrary[idx].l;
+                if(type === "Slider") {
+                    code += `Tab:CreateSlider({Name = "${sName}", Range = {0, 500}, Increment = 1, Callback = function(V) ${sLogic} end})\n`;
+                } else if(type === "Input") {
+                    code += `Tab:CreateInput({Name = "${sName}", PlaceholderText = "Value", Callback = function(T) ${sLogic} end})\n`;
+                } else {
+                    code += `Tab:Create${type}({Name = "${sName}", Callback = function() ${sLogic} end})\n`;
+                }
+            });
+            code += `Lib:Notify({Title = "Sarmiento V6", Content = "Hub Successfully Loaded!", Duration = 5})\n`;
+        }
+
+        document.getElementById('output').value = code;
+        document.getElementById('loading').style.display='none';
+        document.getElementById('terminal').style.display='flex';
+    }
+
+    function openM(id) { document.getElementById(id).classList.add('active'); }
+    function closeM(id) { document.getElementById(id).classList.remove('active'); }
+
+    const canvas = document.getElementById('matrix'); const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const drops = Array(Math.floor(canvas.width/16)).fill(1);
+    setInterval(() => { 
+        ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,canvas.width,canvas.height); 
+        ctx.fillStyle = "#00ff41"; ctx.font = "18px monospace";
+        drops.forEach((y, i) => { 
+            ctx.fillText(String.fromCharCode(Math.random()*128), i*16, y*16); 
+            if(y*16 > canvas.height && Math.random() > 0.98) drops[i] = 0; drops[i]++; 
+        });
+    }, 40);
+    render();
+</script>
+</body>
+</html>
